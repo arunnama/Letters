@@ -106,37 +106,6 @@ struct ContentView: View {
     
     
 }
-    // Function to start auto-scrolling
-//    private func startAutoScrolling() {
-//        timer = DispatchSource.makeTimerSource(queue: DispatchQueue.global())
-//        timer?.schedule(deadline: .now(), repeating: 1.0)
-//        timer?.setEventHandler { [weak self] in
-//            guard let self = self else { return }
-//            if self.currentPage < self.alphabetViewModel.alphabets.count - 1 {
-//                DispatchQueue.main.async {
-//                    self.currentPage += 1
-//                }
-//            } else {
-//                self.timer?.cancel()
-//                self.isAutoScrolling = false
-//            }
-//        }
-//        timer?.resume()
-//    }
-//
-//    // Function to stop auto-scrolling
-//    private func stopAutoScrolling() {
-//        timer?.cancel()
-//        self.isAutoScrolling = false
-//    }
-//}
-
-// ... Rest of the code remains the same ...
-
-
-// ... Rest of the code remains the same ...
-
-
 
 struct AlphabetPageView: View {
     @Binding var currentPage: Int
@@ -223,8 +192,23 @@ struct BubbleView: View {
             bubbleColor = Color.random()
             bubbleSize = CGFloat.random(in: 20...60)
         }
+
+        // Add a scale-up animation when bubbleSize is large enough
+        if bubbleSize >= 40 {
+            withAnimation(Animation.easeInOut(duration: 0.5)) {
+                bubbleSize = bubbleSize * 1.5
+            }
+
+            // Add a pop animation when bubbleSize reaches a certain threshold
+            if bubbleSize >= 100 {
+                withAnimation(Animation.easeInOut(duration: 0.2)) {
+                    bubbleSize = 0
+                }
+            }
+        }
     }
 }
+
 
 extension Color {
     static func random() -> Color {
