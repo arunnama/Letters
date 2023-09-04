@@ -2,6 +2,86 @@ import SwiftUI
 import Dispatch
 import AVFoundation
 
+
+import SwiftUI
+
+@main
+struct KidsLearningApp: App {
+    var body: some Scene {
+        WindowGroup {
+            StartupView()
+        }
+    }
+}
+
+struct StartupView: View {
+    @State private var showContentView = false
+
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack {
+                    Text("Kids Learning App")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .padding(.top, 20)
+
+                    VStack(spacing: 20) {
+                        MenuItemView(title: "Numbers", image: "number.square.fill", color: Color.blue, showContentView: $showContentView)
+                        MenuItemView(title: "Letters", image: "textformat.abc", color: Color.green, showContentView: $showContentView)
+                        MenuItemView(title: "Words", image: "book.fill", color: Color.orange, showContentView: $showContentView)
+                        MenuItemView(title: "Other Option 1", image: "star.fill", color: Color.purple, showContentView: $showContentView)
+                        MenuItemView(title: "Other Option 2", image: "heart.fill", color: Color.red, showContentView: $showContentView)
+                        // Add more menu items as needed
+                    }
+                    .padding()
+
+                    Spacer()
+                }
+            }
+            .background(
+                NavigationLink("", destination: ContentView(), isActive: $showContentView)
+                    .opacity(0)
+                    .buttonStyle(PlainButtonStyle())
+            )
+        }
+    }
+}
+
+
+struct MenuItemView: View {
+    let title: String
+    let image: String
+    let color: Color
+    @Binding var showContentView: Bool
+
+    var body: some View {
+        Button(action: {
+            showContentView = true // Show the content view when a menu item is tapped
+        }) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 20)
+                    .foregroundColor(color)
+                    .frame(height: 150)
+
+                VStack {
+                    Image(systemName: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 80, height: 80)
+                        .foregroundColor(.white)
+
+                    Text(title)
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                }
+            }
+        }
+    }
+}
+
+
 class AlphabetViewModel: ObservableObject {
     @Published var alphabets: [AlphabetItem] = []
 
@@ -29,14 +109,14 @@ class AlphabetViewModel: ObservableObject {
     }
 }
 
-@main
-struct KidsLearningApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
-    }
-}
+//@main
+//struct KidsLearningApp: App {
+//    var body: some Scene {
+//        WindowGroup {
+//            ContentView()
+//        }
+//    }
+//}
 
 class TextToSpeechManager: ObservableObject {
     private let synthesizer = AVSpeechSynthesizer()
