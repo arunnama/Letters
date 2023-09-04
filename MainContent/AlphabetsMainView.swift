@@ -115,30 +115,16 @@ struct MenuItemView: View {
     }
 }
 
-class AlphabetViewModel: ObservableObject {
-    @Published var alphabets: [AlphabetItem] = []
+protocol ContentProtocol: Codable, Identifiable {
+    var description: String { get }
+}
 
-    init() {
-        fetchAlphabets()
-    }
-
-    func fetchAlphabets() {
-        if let url = URL(string: "https://raw.githubusercontent.com/arunnama/traindemo2/main/alphabets.json") {
-            URLSession.shared.dataTask(with: url) { data, _, error in
-                if let data = data {
-                    do {
-                        let decodedData = try JSONDecoder().decode(AlphabetData.self, from: data)
-                        DispatchQueue.main.async {
-                            self.alphabets = decodedData.alphabets
-                        }
-                    } catch {
-                        print("Error decoding JSON: \(error)")
-                    }
-                } else if let error = error {
-                    print("Error fetching JSON data: \(error)")
-                }
-            }.resume()
-        }
+struct NumberItem: ContentProtocol {
+    let id: UUID
+    let number: Int
+    
+    var description: String {
+        return number.description    // You can customize this as needed
     }
 }
 
@@ -169,24 +155,6 @@ class NumberViewModel: ObservableObject {
     }
 }
 
-
-protocol ContentProtocol: Codable, Identifiable {
-    var description: String { get }
-}
-
-
-
-
-struct NumberItem: ContentProtocol {
-    let id: UUID
-    let number: Int
-    
-    var description: String {
-        return number.description    // You can customize this as needed
-    }
-    
-}
-
 struct NumberView: View {
     @ObservedObject var numberViewModel = NumberViewModel()
 
@@ -196,16 +164,6 @@ struct NumberView: View {
                 .font(.largeTitle)
                 .foregroundColor(.blue)
         }
-    }
-}
-
-
-struct WordItem: ContentProtocol {
-    let id: UUID
-    let word: String
-    
-    var description: String {
-        return word // You can customize this as needed
     }
 }
 
@@ -222,6 +180,32 @@ struct AlphabetItem: ContentProtocol {
     }
 }
 
+class AlphabetViewModel: ObservableObject {
+    @Published var alphabets: [AlphabetItem] = []
+
+    init() {
+        fetchAlphabets()
+    }
+
+    func fetchAlphabets() {
+        if let url = URL(string: "https://raw.githubusercontent.com/arunnama/traindemo2/main/alphabets.json") {
+            URLSession.shared.dataTask(with: url) { data, _, error in
+                if let data = data {
+                    do {
+                        let decodedData = try JSONDecoder().decode(AlphabetData.self, from: data)
+                        DispatchQueue.main.async {
+                            self.alphabets = decodedData.alphabets
+                        }
+                    } catch {
+                        print("Error decoding JSON: \(error)")
+                    }
+                } else if let error = error {
+                    print("Error fetching JSON data: \(error)")
+                }
+            }.resume()
+        }
+    }
+}
 
 struct AlphabetView: View {
     @ObservedObject var alphabetViewModel = AlphabetViewModel()
@@ -235,6 +219,14 @@ struct AlphabetView: View {
     }
 }
 
+struct WordItem: ContentProtocol {
+    let id: UUID
+    let word: String
+    
+    var description: String {
+        return word // You can customize this as needed
+    }
+}
 
 struct WordView: View {
     @ObservedObject var wordViewModel = WordViewModel()
@@ -308,7 +300,6 @@ class TimerManager: ObservableObject {
     }
 }
 
-
 struct ContentView<T: ContentProtocol, DataViewModel: ObservableObject, DataItemView: View>: View {
     @State private var currentPage = 0
 
@@ -343,11 +334,7 @@ struct ContentView<T: ContentProtocol, DataViewModel: ObservableObject, DataItem
                 HStack {
                     Button(action: {
                         if currentPage < dataItems.count {
-                            
-                            let id = dataItems[currentPage].id
-                            
-                            ttsManager.speak(dataItems[currentPage] as! String)
-                            
+                            ttsManager.speak(dataItems[currentPage].description)
                         }
                     }) {
                         Image(systemName: "play.circle.fill")
@@ -401,26 +388,28 @@ struct ContentView<T: ContentProtocol, DataViewModel: ObservableObject, DataItem
     }
 }
 
-
 struct DataPageView<T: ContentProtocol, DataItemView: View>: View {
     @Binding var currentPage: Int
-    let dataItems: [T] // Change this line to use an array [T] instead of ArraySlice<T>
+    let dataItems: [T]
     let dataItemViewBuilder: (T) -> DataItemView
     var ttsManager: TextToSpeechManager
 
     var body: some View {
         TabView(selection: $currentPage) {
             ForEach(dataItems.indices, id: \.self) { index in
-                dataItemViewBuilder(dataItems[index])
+                AnimatedLetterView(letter: dataItems[index].description)
+                    .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
             }
         }
         .tabViewStyle(PageTabViewStyle())
         .onChange(of: currentPage) { newValue in
-            
             ttsManager.speak(dataItems[currentPage].description)
         }
     }
 }
+
+
+
 
 struct AnimatedLetterView: View {
     let letter: String
