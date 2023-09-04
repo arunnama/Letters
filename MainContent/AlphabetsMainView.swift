@@ -1,6 +1,8 @@
 import SwiftUI
 import Dispatch
 import AVFoundation
+import Foundation
+
 
 @main
 struct KidsLearningApp: App {
@@ -120,12 +122,17 @@ protocol ContentProtocol: Codable, Identifiable {
 }
 
 struct NumberItem: ContentProtocol {
-    let id: UUID
+    let id = UUID()
     let number: Int
-    
+
     var description: String {
-        return number.description    // You can customize this as needed
+        return number.description // You can customize this as needed
     }
+}
+
+
+struct NumberResponse: Codable {
+    let numbers: [Int]
 }
 
 class NumberViewModel: ObservableObject {
@@ -136,14 +143,17 @@ class NumberViewModel: ObservableObject {
     }
 
     func fetchNumbers() {
-        if let url = URL(string: "https://raw.githubusercontent.com/arunnama/traindemo2/main/numbers.json") { // Replace with the actual API URL for numbers
+        if let url = URL(string: "https://raw.githubusercontent.com/arunnama/traindemo2/main/numbers.json") {
             URLSession.shared.dataTask(with: url) { data, _, error in
                 if let data = data {
                     do {
-                        let decodedData = try JSONDecoder().decode([NumberItem].self, from: data)
-                        DispatchQueue.main.async {
-                            self.numbers = decodedData
-                        }
+                        let decodedData = try JSONDecoder().decode(NumberResponse.self, from: data)
+                        // Update the numbers property on the main thread
+                                  DispatchQueue.main.async {
+                                      self.numbers = decodedData.numbers.map { number in
+                                          NumberItem(number: number)
+                                      }
+                                  }
                     } catch {
                         print("Error decoding JSON: \(error)")
                     }
@@ -155,13 +165,15 @@ class NumberViewModel: ObservableObject {
     }
 }
 
+
+
 struct NumberView: View {
     @ObservedObject var numberViewModel = NumberViewModel()
 
     var body: some View {
         ContentView(dataViewModel: numberViewModel, dataItems: numberViewModel.numbers) { numberItem in
-            Text(numberItem.number.description)
-                .font(.largeTitle)
+            AnimatedLetterView(letter: numberItem.description)
+                .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
                 .foregroundColor(.blue)
         }
     }
@@ -407,9 +419,6 @@ struct DataPageView<T: ContentProtocol, DataItemView: View>: View {
         }
     }
 }
-
-
-
 
 struct AnimatedLetterView: View {
     let letter: String
