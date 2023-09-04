@@ -16,9 +16,7 @@
 		C950D6972AA4839B0008B398 /* LoadAlphabets.swift in Sources */ = {isa = PBXBuildFile; fileRef = C950D6962AA4839B0008B398 /* LoadAlphabets.swift */; };
 		C950D69D2AA484100008B398 /* AlphabetsMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C950D69C2AA484100008B398 /* AlphabetsMainView.swift */; };
 		C950D6A02AA484D20008B398 /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C950D69F2AA484D20008B398 /* AppConstants.swift */; };
-		C950D6A22AA4AB8A0008B398 /* AlphabetData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C950D6A12AA4AB8A0008B398 /* AlphabetData.swift */; };
 		C950D6A42AA4ABA70008B398 /* AlphabetViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C950D6A32AA4ABA70008B398 /* AlphabetViewModel.swift */; };
-		C950D6A92AA4AE420008B398 /* AudioFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = C950D6A82AA4AE420008B398 /* AudioFeature.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,9 +49,7 @@
 		C950D6962AA4839B0008B398 /* LoadAlphabets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadAlphabets.swift; sourceTree = "<group>"; };
 		C950D69C2AA484100008B398 /* AlphabetsMainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlphabetsMainView.swift; sourceTree = "<group>"; };
 		C950D69F2AA484D20008B398 /* AppConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
-		C950D6A12AA4AB8A0008B398 /* AlphabetData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlphabetData.swift; sourceTree = "<group>"; };
 		C950D6A32AA4ABA70008B398 /* AlphabetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlphabetViewModel.swift; sourceTree = "<group>"; };
-		C950D6A82AA4AE420008B398 /* AudioFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFeature.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,7 +82,6 @@
 			children = (
 				C950D6A72AA4AE230008B398 /* AudioFeature */,
 				C950D6A32AA4ABA70008B398 /* AlphabetViewModel.swift */,
-				C950D6A12AA4AB8A0008B398 /* AlphabetData.swift */,
 				C950D69E2AA484C50008B398 /* Utils */,
 				C950D69B2AA483F20008B398 /* MainContent */,
 				C950D6982AA483BA0008B398 /* Views */,
@@ -177,7 +172,6 @@
 		C950D6A72AA4AE230008B398 /* AudioFeature */ = {
 			isa = PBXGroup;
 			children = (
-				C950D6A82AA4AE420008B398 /* AudioFeature.swift */,
 			);
 			path = AudioFeature;
 			sourceTree = "<group>";
@@ -316,8 +310,6 @@
 				C950D66C2AA482FA0008B398 /* LettersApp.swift in Sources */,
 				C950D6972AA4839B0008B398 /* LoadAlphabets.swift in Sources */,
 				C950D6A42AA4ABA70008B398 /* AlphabetViewModel.swift in Sources */,
-				C950D6A22AA4AB8A0008B398 /* AlphabetData.swift in Sources */,
-				C950D6A92AA4AE420008B398 /* AudioFeature.swift in Sources */,
 				C950D6A02AA484D20008B398 /* AppConstants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
