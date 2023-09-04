@@ -1,16 +1,6 @@
-//
-//  AlphabetsMainView.swift
-//  Letters
-//
-//  Created by Arun Kumar Nama on 3/9/23.
-//
-
-
-
 import SwiftUI
 import Dispatch
 import AVFoundation
-import Combine
 
 class AlphabetViewModel: ObservableObject {
     @Published var alphabets: [AlphabetItem] = []
@@ -39,27 +29,21 @@ class AlphabetViewModel: ObservableObject {
     }
 }
 
-
 @main
 struct KidsLearningApp: App {
-    @State private var showMenu = false // Track the menu visibility
-
     var body: some Scene {
         WindowGroup {
-            StartupView(showMenu: $showMenu)
+            ContentView()
         }
     }
 }
-
-
-
 
 class TextToSpeechManager: ObservableObject {
     private let synthesizer = AVSpeechSynthesizer()
 
     func speak(_ text: String) {
         let utterance = AVSpeechUtterance(string: text)
-        utterance.voice = AVSpeechSynthesisVoice(language: "en-US") // Set the language
+        utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
         synthesizer.speak(utterance)
     }
 
@@ -87,7 +71,6 @@ class TimerManager: ObservableObject {
     }
 }
 
-
 struct AlphabetData: Codable {
     let alphabets: [AlphabetItem]
 }
@@ -97,47 +80,12 @@ struct AlphabetItem: Codable, Identifiable {
     let letter: String
 }
 
-
-
-struct StartupView: View {
-    @Binding var showMenu: Bool
-
-    var body: some View {
-        NavigationView {
-            VStack {
-                Text("Kids Learning App")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .padding(.top, 20)
-
-                NavigationLink("", destination: ContentView(showMenu: $showMenu), isActive: $showMenu)
-                    .hidden() // Hidden link to navigate to the main content view
-
-                Button(action: {
-                    withAnimation {
-                        showMenu.toggle() // Show the menu
-                    }
-                }) {
-                    Text("Start Learning")
-                        .font(.title)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(10)
-                }
-            }
-        }
-    }
-}
-
 struct ContentView: View {
-    @Binding var showMenu: Bool
-    @State private var selectedDataSource: DataSource = .alphabet
     @State private var currentPage = 0
     @ObservedObject var ttsManager = TextToSpeechManager()
-    @State private var isAutoScrolling = false // Track auto-scrolling state
+    @State private var isAutoScrolling = false
     @StateObject var timerManager = TimerManager()
-    @ObservedObject var alphabetViewModel = AlphabetViewModel() // Initialize AlphabetViewModel
+    @ObservedObject var alphabetViewModel = AlphabetViewModel()
 
     var body: some View {
         NavigationView {
@@ -147,126 +95,12 @@ struct ContentView: View {
                     .fontWeight(.bold)
                     .padding(.top, 20)
 
-                Picker("Select Data Source", selection: $selectedDataSource) {
-                    Text("Alphabet").tag(DataSource.alphabet)
-                    Text("Numbers").tag(DataSource.numbers)
-                    Text("Words").tag(DataSource.words)
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding()
-
-                switch selectedDataSource {
-                case .alphabet:
-                    AlphabetPageView(currentPage: $currentPage, alphabets: alphabetViewModel.alphabets, ttsManager: ttsManager) // Pass the alphabets
-                        .frame(height: UIScreen.main.bounds.height * 0.7)
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(20)
-                        .padding()
-
-                case .numbers:
-                    AlphabetAppView()
-
-                case .words:
-                    AlphabetAppView()
-                }
-
-                Spacer()
-
-                HStack(spacing: 20) {
-                    Button(action: {
-                        withAnimation {
-                            showMenu.toggle() // Show the menu
-                        }
-                    }) {
-                        Text("Menu")
-                            .font(.title)
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.blue)
-                            .cornerRadius(10)
-                    }
-
-                    Button(action: {
-                        ttsManager.speak("Your Text Here") // Replace with the text to speak
-                    }) {
-                        Image(systemName: "play.circle.fill")
-                            .resizable()
-                            .frame(width: 50, height: 50)
-                            .foregroundColor(isAutoScrolling ? .gray : .blue)
-                            .padding()
-                            .background(Color.white)
-                            .clipShape(Circle())
-                            .disabled(isAutoScrolling)
-                    }
-
-                    Button(action: {
-                        ttsManager.stopSpeaking()
-                        timerManager.stopAutoScrolling() // Stop auto-scrolling
-                        isAutoScrolling = false
-                    }) {
-                        Image(systemName: "stop.circle.fill")
-                            .resizable()
-                            .frame(width: 50, height: 50)
-                            .foregroundColor(.red)
-                            .padding()
-                            .background(Color.white)
-                            .clipShape(Circle())
-                    }
-
-                    Button(action: {
-                        isAutoScrolling.toggle()
-                        if isAutoScrolling {
-                            timerManager.startAutoScrolling(withInterval: 1.0) {
-                                if currentPage < alphabetViewModel.alphabets.count - 1 {
-                                    currentPage += 1
-                                } else {
-                                    isAutoScrolling = false
-                                }
-                            }
-                        } else {
-                            timerManager.stopAutoScrolling() // Stop auto-scrolling when paused
-                        }
-                    }) {
-                        Image(systemName: "arrow.right.circle.fill")
-                            .resizable()
-                            .frame(width: 50, height: 50)
-                            .foregroundColor(isAutoScrolling ? .gray : .blue)
-                            .padding()
-                            .background(Color.white)
-                            .clipShape(Circle())
-                            .disabled(isAutoScrolling)
-                    }
-                }
-            }
-            .animation(.default)
-            .navigationBarTitle("", displayMode: .inline)
-        }
-    }
-}
-
-
-struct AlphabetAppView: View {
-    @ObservedObject var alphabetViewModel = AlphabetViewModel()
-    @State private var currentPage = 0
-    @ObservedObject var ttsManager = TextToSpeechManager()
-    @State private var isAutoScrolling = false // Track auto-scrolling state
-    
-    @StateObject var timerManager = TimerManager()
-    
-    var body: some View {
-        NavigationView {
-            VStack {
-                Text("Alphabet Adventure")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .padding(.top, 20)
-                
                 AlphabetPageView(currentPage: $currentPage, alphabets: alphabetViewModel.alphabets, ttsManager: ttsManager)
                     .frame(height: UIScreen.main.bounds.height * 0.7)
                     .background(Color.gray.opacity(0.2))
                     .cornerRadius(20)
                     .padding()
-                
+
                 HStack {
                     Button(action: {
                         ttsManager.speak(alphabetViewModel.alphabets[currentPage].letter)
@@ -278,10 +112,10 @@ struct AlphabetAppView: View {
                             .disabled(isAutoScrolling)
                     }
                     .padding()
-                    
+
                     Button(action: {
                         ttsManager.stopSpeaking()
-                        timerManager.stopAutoScrolling() // Stop auto-scrolling
+                        timerManager.stopAutoScrolling()
                         isAutoScrolling = false
                     }) {
                         Image(systemName: "stop.circle.fill")
@@ -289,9 +123,8 @@ struct AlphabetAppView: View {
                             .frame(width: 50, height: 50)
                     }
                     .padding()
-                    
+
                     Button(action: {
-                        // Toggle auto-scrolling on play button
                         isAutoScrolling.toggle()
                         if isAutoScrolling {
                             timerManager.startAutoScrolling(withInterval: 1.0) {
@@ -302,7 +135,7 @@ struct AlphabetAppView: View {
                                 }
                             }
                         } else {
-                            timerManager.stopAutoScrolling() // Stop auto-scrolling when paused
+                            timerManager.stopAutoScrolling()
                         }
                     }) {
                         Image(systemName: "arrow.right.circle.fill")
@@ -313,16 +146,14 @@ struct AlphabetAppView: View {
                     }
                     .padding()
                 }
-                
+
                 Spacer()
             }
             .animation(.default)
             .navigationBarTitle("", displayMode: .inline)
-            .overlay(FloatingBubblesView(), alignment: .top) // Overlay bubbles
+            .overlay(FloatingBubblesView(), alignment: .top)
         }
     }
-    
-    
 }
 
 struct AlphabetPageView: View {
@@ -333,12 +164,11 @@ struct AlphabetPageView: View {
     var body: some View {
         TabView(selection: $currentPage) {
             ForEach(alphabets.indices, id: \.self) { index in
-                AnimatedLetterView(letter: alphabets[index].letter) // Use AnimatedLetterView
+                AnimatedLetterView(letter: alphabets[index].letter)
             }
         }
         .tabViewStyle(PageTabViewStyle())
         .onChange(of: currentPage) { newValue in
-            // Speak the alphabet when currentPage changes
             ttsManager.speak(alphabets[newValue].letter)
         }
     }
@@ -350,16 +180,15 @@ struct AnimatedLetterView: View {
     var body: some View {
         ZStack {
             Text(letter)
-                .font(.custom("Comic Sans MS", size: 300)) // Increase the font size
+                .font(.custom("Comic Sans MS", size: 300))
                 .foregroundColor(.blue)
-                .scaleEffect(0.2) // Initial scale to 20%
-                .opacity(0.2) // Initial opacity to 20%
+                .scaleEffect(1.0)
+                .opacity(1.0)
                 .animation(
-                    Animation.easeInOut(duration: 0.5) // Customize the animation duration
-                        .repeatCount(1, autoreverses: true) // Add a repeating bounce effect
+                    Animation.easeInOut(duration: 0.5)
+                        .repeatCount(1, autoreverses: true)
                 )
                 .onAppear {
-                    // Scale and fade in the letter with a funny animation
                     withAnimation(Animation.easeOut(duration: 1).repeatForever(autoreverses: true)) {
                         self.scaleEffect(1.0)
                         self.opacity(1.0)
@@ -411,13 +240,11 @@ struct BubbleView: View {
             bubbleSize = CGFloat.random(in: 20...60)
         }
 
-        // Add a scale-up animation when bubbleSize is large enough
         if bubbleSize >= 40 {
             withAnimation(Animation.easeInOut(duration: 0.5)) {
                 bubbleSize = bubbleSize * 1.5
             }
 
-            // Add a pop animation when bubbleSize reaches a certain threshold
             if bubbleSize >= 100 {
                 withAnimation(Animation.easeInOut(duration: 0.2)) {
                     bubbleSize = 0
@@ -426,7 +253,6 @@ struct BubbleView: View {
         }
     }
 }
-
 
 extension Color {
     static func random() -> Color {
@@ -437,67 +263,12 @@ extension Color {
     }
 }
 
-
-class NumberItem: Identifiable {
-    let id: UUID
-    let number: Int
-
-    init(number: Int) {
-        self.id = UUID()
-        self.number = number
-    }
-}
-
-class WordItem: Identifiable {
-    let id: UUID
-    let word: String
-
-    init(word: String) {
-        self.id = UUID()
-        self.word = word
-    }
-}
-
-enum DataSource {
-    case alphabet
-    case numbers
-    case words
-
-    var title: String {
-        switch self {
-        case .alphabet:
-            return "Alphabet"
-        case .numbers:
-            return "Numbers"
-        case .words:
-            return "Words"
-        }
-    }
-}
-
-
-class NumberViewModel: ObservableObject {
-    @Published var numbers: [NumberItem]
-
-    init() {
-        // Dummy data for numbers (1 to 10)
-        self.numbers = (1...10).map { number in
-            NumberItem(number: number)
-        }
-    }
-}
-
-class WordViewModel: ObservableObject {
-    @Published var words: [WordItem]
-
-    init() {
-        // Dummy data for words
-        self.words = ["Apple", "Banana", "Cat", "Dog", "Elephant"].map { word in
-            WordItem(word: word)
-        }
-    }
-}
-
-
-
+//@main
+//struct KidsLearningApp: App {
+//    var body: some Scene {
+//        WindowGroup {
+//            ContentView()
+//        }
+//    }
+//}
 
