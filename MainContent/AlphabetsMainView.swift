@@ -1,56 +1,62 @@
 import SwiftUI
 import Dispatch
 import AVFoundation
-import Foundation
+
+enum MenuItem: CaseIterable {
+    case numbers, letters, words, other1, other2 // Add more options as needed
+
+    var title: String {
+        switch self {
+        case .numbers: return "Numbers"
+        case .letters: return "Letters"
+        case .words: return "Words"
+        case .other1: return "Other Option 1"
+        case .other2: return "Other Option 2"
+        }
+    }
+
+    static var allCases: [MenuItem] {
+        return [.numbers, .letters, .words, .other1, .other2] // Add more cases if needed
+    }
+}
 
 
 @main
 struct KidsLearningApp: App {
+    @State private var selectedMenuItem: MenuItem? = nil
+
     var body: some Scene {
         WindowGroup {
-            StartupView(contentView: AlphabetView()) // For Numbers
+            StartupView(selectedMenuItem: $selectedMenuItem)
+                .onAppear {
+                    selectedMenuItem = nil // Reset selectedMenuItem when the view appears
+                }
         }
     }
 }
 
-struct StartupView<T: View>: View {
-    @State private var selectedMenuItem: MenuItem? = nil
-    let contentView: T
-
-    enum MenuItem {
-        case numbers, letters, words, other1, other2 // Add more options as needed
-    }
+struct StartupView: View {
+    @Binding var selectedMenuItem: MenuItem?
 
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack {
-                    Text("Kids Learning App")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .padding(.top, 20)
-
-                    VStack(spacing: 20) {
-                        MenuItemView(title: "Numbers", image: "number.square.fill", color: Color.blue) {
-                            selectedMenuItem = .numbers
+            VStack {
+                Text("Kids Learning App")
+                    .font(.largeTitle)
+                    .padding(.top, 20)
+                ScrollView {
+                    VStack {
+                        VStack(spacing: 20) {
+                            ForEach(MenuItem.allCases, id: \.self) { item in
+                                MenuItemView(item: item) {
+                                    selectedMenuItem = item
+                                }
+                            }
                         }
-                        MenuItemView(title: "Letters", image: "textformat.abc", color: Color.green) {
-                            selectedMenuItem = .letters
-                        }
-                        MenuItemView(title: "Words", image: "book.fill", color: Color.orange) {
-                            selectedMenuItem = .words
-                        }
-                        MenuItemView(title: "Other Option 1", image: "star.fill", color: Color.purple) {
-                            selectedMenuItem = .other1
-                        }
-                        MenuItemView(title: "Other Option 2", image: "heart.fill", color: Color.red) {
-                            selectedMenuItem = .other2
-                        }
-                        // Add more menu items as needed
+                        .padding()
+                        
+                        Spacer()
                     }
-                    .padding()
-
-                    Spacer()
                 }
             }
             .background(
@@ -69,15 +75,12 @@ struct StartupView<T: View>: View {
         case .numbers:
             return AnyView(NumberView())
         case .letters:
-            // You can replace this with your alphabet view
             return AnyView(AlphabetView())
         case .words:
             return AnyView(WordView())
         case .other1:
-            // Replace this with your other content view
             return AnyView(Text("Other Option 1 View"))
         case .other2:
-            // Replace this with your other content view
             return AnyView(Text("Other Option 2 View"))
         default:
             return AnyView(EmptyView())
@@ -86,9 +89,7 @@ struct StartupView<T: View>: View {
 }
 
 struct MenuItemView: View {
-    let title: String
-    let image: String
-    let color: Color
+    let item: MenuItem
     let action: () -> Void
 
     var body: some View {
@@ -97,22 +98,44 @@ struct MenuItemView: View {
         }) {
             ZStack {
                 RoundedRectangle(cornerRadius: 20)
-                    .foregroundColor(color)
+                    .foregroundColor(item.color)
                     .frame(height: 150)
 
                 VStack {
-                    Image(systemName: image)
+                    Image(systemName: item.imageName)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 80, height: 80)
                         .foregroundColor(.white)
 
-                    Text(title)
+                    Text(item.title)
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
                 }
             }
+        }
+    }
+}
+
+extension MenuItem {
+    var color: Color {
+        switch self {
+        case .numbers: return .blue
+        case .letters: return .green
+        case .words: return .orange
+        case .other1: return .purple
+        case .other2: return .red
+        }
+    }
+
+    var imageName: String {
+        switch self {
+        case .numbers: return "number.square.fill"
+        case .letters: return "textformat.abc"
+        case .words: return "book.fill"
+        case .other1: return "star.fill"
+        case .other2: return "heart.fill"
         }
     }
 }
@@ -129,7 +152,6 @@ struct NumberItem: ContentProtocol {
         return number.description // You can customize this as needed
     }
 }
-
 
 struct NumberResponse: Codable {
     let numbers: [Int]
@@ -149,11 +171,11 @@ class NumberViewModel: ObservableObject {
                     do {
                         let decodedData = try JSONDecoder().decode(NumberResponse.self, from: data)
                         // Update the numbers property on the main thread
-                                  DispatchQueue.main.async {
-                                      self.numbers = decodedData.numbers.map { number in
-                                          NumberItem(number: number)
-                                      }
-                                  }
+                        DispatchQueue.main.async {
+                            self.numbers = decodedData.numbers.map { number in
+                                NumberItem(number: number)
+                            }
+                        }
                     } catch {
                         print("Error decoding JSON: \(error)")
                     }
@@ -165,8 +187,6 @@ class NumberViewModel: ObservableObject {
     }
 }
 
-
-
 struct NumberView: View {
     @ObservedObject var numberViewModel = NumberViewModel()
 
@@ -176,6 +196,7 @@ struct NumberView: View {
                 .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
                 .foregroundColor(.blue)
         }
+        .navigationBarTitle("Numbers", displayMode: .large)
     }
 }
 
@@ -186,7 +207,7 @@ struct AlphabetData: Codable {
 struct AlphabetItem: ContentProtocol {
     let id = UUID()
     let letter: String
-    
+
     var description: String {
         return letter // You can customize this as needed
     }
@@ -224,17 +245,18 @@ struct AlphabetView: View {
 
     var body: some View {
         ContentView(dataViewModel: alphabetViewModel, dataItems: alphabetViewModel.alphabets) { alphabetItem in
-            Text(alphabetItem.letter) // Use alphabetItem.letter here
+            Text(alphabetItem.letter)
                 .font(.largeTitle)
                 .foregroundColor(.blue)
         }
+        .navigationBarTitle("Alphabets", displayMode: .large)
     }
 }
 
 struct WordItem: ContentProtocol {
     let id: UUID
     let word: String
-    
+
     var description: String {
         return word // You can customize this as needed
     }
@@ -249,6 +271,7 @@ struct WordView: View {
                 .font(.largeTitle)
                 .foregroundColor(.green)
         }
+        .navigationBarTitle("Words", displayMode: .large)
     }
 }
 
@@ -260,7 +283,7 @@ class WordViewModel: ObservableObject {
     }
 
     func fetchWords() {
-        if let url = URL(string: "https://raw.githubusercontent.com/arunnama/traindemo2/main/words.json") { // Replace with the actual API URL for words
+        if let url = URL(string: "https://raw.githubusercontent.com/arunnama/traindemo2/main/words.json") {
             URLSession.shared.dataTask(with: url) { data, _, error in
                 if let data = data {
                     do {
@@ -330,73 +353,65 @@ struct ContentView<T: ContentProtocol, DataViewModel: ObservableObject, DataItem
     }
 
     var body: some View {
-        NavigationView {
-            VStack {
-                Text("Kids Learning App")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .padding(.top, 20)
+        VStack {
+            DataPageView(currentPage: $currentPage, dataItems: dataItems, dataItemViewBuilder: dataItemViewBuilder, ttsManager: ttsManager)
+                .frame(height: UIScreen.main.bounds.height * 0.7)
+                .background(Color.gray.opacity(0.2))
+                .cornerRadius(20)
+                .padding()
 
-                DataPageView(currentPage: $currentPage, dataItems: dataItems, dataItemViewBuilder: dataItemViewBuilder, ttsManager: ttsManager)
-                    .frame(height: UIScreen.main.bounds.height * 0.7)
-                    .background(Color.gray.opacity(0.2))
-                    .cornerRadius(20)
-                    .padding()
-
-                HStack {
-                    Button(action: {
-                        if currentPage < dataItems.count {
-                            ttsManager.speak(dataItems[currentPage].description)
-                        }
-                    }) {
-                        Image(systemName: "play.circle.fill")
-                            .resizable()
-                            .frame(width: 50, height: 50)
-                            .foregroundColor(isAutoScrolling ? .gray : .blue)
-                            .disabled(isAutoScrolling)
+            HStack {
+                Button(action: {
+                    if currentPage < dataItems.count {
+                        ttsManager.speak(dataItems[currentPage].description)
                     }
-                    .padding()
-
-                    Button(action: {
-                        ttsManager.stopSpeaking()
-                        timerManager.stopAutoScrolling()
-                        isAutoScrolling = false
-                    }) {
-                        Image(systemName: "stop.circle.fill")
-                            .resizable()
-                            .frame(width: 50, height: 50)
-                    }
-                    .padding()
-
-                    Button(action: {
-                        isAutoScrolling.toggle()
-                        if isAutoScrolling {
-                            timerManager.startAutoScrolling(withInterval: 1.0) {
-                                if currentPage < dataItems.count - 1 {
-                                    currentPage += 1
-                                } else {
-                                    isAutoScrolling = false
-                                }
-                            }
-                        } else {
-                            timerManager.stopAutoScrolling()
-                        }
-                    }) {
-                        Image(systemName: "arrow.right.circle.fill")
-                            .resizable()
-                            .frame(width: 50, height: 50)
-                            .foregroundColor(isAutoScrolling ? .gray : .blue)
-                            .disabled(isAutoScrolling)
-                    }
-                    .padding()
+                }) {
+                    Image(systemName: "play.circle.fill")
+                        .resizable()
+                        .frame(width: 50, height: 50)
+                        .foregroundColor(isAutoScrolling ? .gray : .blue)
+                        .disabled(isAutoScrolling)
                 }
+                .padding()
 
-                Spacer()
+                Button(action: {
+                    ttsManager.stopSpeaking()
+                    timerManager.stopAutoScrolling()
+                    isAutoScrolling = false
+                }) {
+                    Image(systemName: "stop.circle.fill")
+                        .resizable()
+                        .frame(width: 50, height: 50)
+                }
+                .padding()
+
+                Button(action: {
+                    isAutoScrolling.toggle()
+                    if isAutoScrolling {
+                        timerManager.startAutoScrolling(withInterval: 1.0) {
+                            if currentPage < dataItems.count - 1 {
+                                currentPage += 1
+                            } else {
+                                isAutoScrolling = false
+                            }
+                        }
+                    } else {
+                        timerManager.stopAutoScrolling()
+                    }
+                }) {
+                    Image(systemName: "arrow.right.circle.fill")
+                        .resizable()
+                        .frame(width: 50, height: 50)
+                        .foregroundColor(isAutoScrolling ? .gray : .blue)
+                        .disabled(isAutoScrolling)
+                }
+                .padding()
             }
-            .animation(.default)
-            .navigationBarTitle("", displayMode: .inline)
-            .overlay(FloatingBubblesView(), alignment: .top)
+
+            Spacer()
         }
+        .animation(.default)
+        .overlay(FloatingBubblesView(), alignment: .top)
     }
 }
 
@@ -508,4 +523,5 @@ extension Color {
         return Color(red: red, green: green, blue: blue)
     }
 }
+
 
