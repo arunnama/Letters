@@ -187,8 +187,6 @@ class NumberViewModel: ObservableObject {
     }
 }
 
-
-
 struct NumberView: View {
     @ObservedObject var numberViewModel = NumberViewModel()
 
@@ -246,33 +244,77 @@ struct AlphabetView: View {
 }
 
 
+//struct WordView: View {
+//    @ObservedObject var wordViewModel = WordViewModel()
+//
+//    var body: some View {
+//        NavigationView {
+//            ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
+//                AnimatedLetterView(letter: wordItem.word) // Use AnimatedLetterView here
+//                    .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
+//                    .foregroundColor(.green)
+//            }
+//            .toolbar {
+//                ToolbarItem(placement: .navigationBarLeading) {
+//                    Button(action: {}) {
+//                        Image(systemName: "gear")
+//                    }
+//                }
+//                ToolbarItem(placement: .navigationBarTrailing) {
+//                    Button(action: {}) {
+//                        Image(systemName: "info.circle")
+//                    }
+//                }
+//            }
+//            .animation(.default)
+//        }
+//        .navigationTitle("Words")
+//    }
+//}
 struct WordView: View {
     @ObservedObject var wordViewModel = WordViewModel()
 
     var body: some View {
-        NavigationView {
-            ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
-                AnimatedLetterView(letter: wordItem.word) // Use AnimatedLetterView here
-                    .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
-                    .foregroundColor(.green)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {}) {
-                        Image(systemName: "gear")
-                    }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {}) {
-                        Image(systemName: "info.circle")
-                    }
-                }
-            }
-            .animation(.default)
+        ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.wordItems) { wordItem in
+            WordCardView(wordItem: wordItem)
         }
-        .navigationTitle("Words")
+        .navigationBarTitle("Words", displayMode: .large)
     }
 }
+
+struct WordCardView: View {
+    let wordItem: WordItem
+
+    var body: some View {
+        VStack {
+            Text(wordItem.letter)
+                .font(.largeTitle)
+                .foregroundColor(.blue)
+                .padding(.top, 20)
+
+            ScrollView {
+                LazyVStack(spacing: 20) {
+                    ForEach(wordItem.words, id: \.self) { word in
+                        Text(word)
+                            .font(.title)
+                            .foregroundColor(.green)
+                    }
+                    .padding(.horizontal, 20)
+                }
+            }
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .foregroundColor(Color.white)
+                .shadow(radius: 5)
+                .padding()
+        )
+        .frame(maxWidth: .infinity)
+    }
+}
+
+
+
 
 
 
@@ -318,31 +360,44 @@ class AlphabetViewModel: ObservableObject {
 
 
 
-struct WordItem: ContentProtocol {
-    let id: UUID
-    let word: String
+struct WordItem: ContentProtocol, Identifiable {
+    let id = UUID()
+    let letter: String
+    let words: [String]
 
     var description: String {
-        return word // You can customize this as needed
+        return "\(letter): \(words.joined(separator: ", "))"
     }
 }
 
 
+struct WordResponse: Codable {
+    let words: [String: [String]]
+}
+
+
 class WordViewModel: ObservableObject {
-    @Published var words: [WordItem] = []
+    @Published var wordItems: [WordItem] = []
 
     init() {
         fetchWords()
     }
 
     func fetchWords() {
+        
         if let url = URL(string: "https://raw.githubusercontent.com/arunnama/traindemo2/main/words.json") {
             URLSession.shared.dataTask(with: url) { data, _, error in
                 if let data = data {
                     do {
-                        let decodedData = try JSONDecoder().decode([WordItem].self, from: data)
+                        let decodedData = try JSONDecoder().decode(WordResponse.self, from: data)
+                        var wordItems: [WordItem] = []
+
+                        for (letter, words) in decodedData.words {
+                            wordItems.append(WordItem(letter: letter, words: words))
+                        }
+
                         DispatchQueue.main.async {
-                            self.words = decodedData
+                            self.wordItems = wordItems
                         }
                     } catch {
                         print("Error decoding JSON: \(error)")
@@ -354,6 +409,9 @@ class WordViewModel: ObservableObject {
         }
     }
 }
+
+
+
 
 class TextToSpeechManager: ObservableObject {
     private let synthesizer = AVSpeechSynthesizer()
