@@ -20,7 +20,6 @@ enum MenuItem: CaseIterable {
     }
 }
 
-
 @main
 struct KidsLearningApp: App {
     @State private var selectedMenuItem: MenuItem? = nil
@@ -54,7 +53,7 @@ struct StartupView: View {
                             }
                         }
                         .padding()
-                        
+
                         Spacer()
                     }
                 }
@@ -243,17 +242,42 @@ struct AlphabetView: View {
     }
 }
 
+//struct WordView: View {
+//    @ObservedObject var wordViewModel = WordViewModel()
+//
+//    var body: some View {
+//        ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
+//            WordCardView(wordItem: wordItem)
+//        }
+//        .navigationBarTitle("Words", displayMode: .large)
+//    }
+//}
 
 struct WordView: View {
     @ObservedObject var wordViewModel = WordViewModel()
 
     var body: some View {
-        ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
-            WordCardView(wordItem: wordItem)
-        }
-        .navigationBarTitle("Words", displayMode: .large)
+        NavigationView {
+            ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
+                WordCardView(wordItem: wordItem)
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {}) {
+                        Image(systemName: "gear")
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {}) {
+                        Image(systemName: "info.circle")
+                    }
+                }
+            }.animation(.default) // Add animation here
+
+        }.navigationTitle("Words") 
     }
 }
+
 
 struct WordCardView: View {
     let wordItem: WordItem
@@ -268,9 +292,7 @@ struct WordCardView: View {
             ScrollView {
                 LazyVStack(spacing: 20) {
                     ForEach(wordItem.words, id: \.self) { word in
-                        Text(word)
-                            .font(.title)
-                            .foregroundColor(.green)
+                        WordCard(word: word)
                     }
                     .padding(.horizontal, 20)
                 }
@@ -278,13 +300,42 @@ struct WordCardView: View {
         }
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .foregroundColor(Color.white)
+                .foregroundColor(Color(red: 255/255, green: 223/255, blue: 186/255)) // Use a child-friendly background color
                 .shadow(radius: 5)
                 .padding()
         )
         .frame(maxWidth: .infinity)
     }
 }
+
+struct WordCard: View {
+    let word: String
+
+    var body: some View {
+        VStack {
+            Text(word)
+                .font(.title)
+                .foregroundColor(.green)
+            
+            // Add an image/icon next to the word
+            Image(systemName: "apple.fill") // Replace with an appropriate image
+                .resizable()
+                .frame(width: 50, height: 50)
+                .foregroundColor(.orange)
+
+            // Include a speaker button for pronunciation
+            Button(action: {
+                // Add text-to-speech functionality here
+            }) {
+                Image(systemName: "speaker.fill")
+                    .resizable()
+                    .frame(width: 30, height: 30)
+                    .foregroundColor(.blue)
+            }
+        }
+    }
+}
+
 
 struct AlphabetData: Codable {
     let alphabets: [AlphabetItem]
@@ -326,8 +377,6 @@ class AlphabetViewModel: ObservableObject {
     }
 }
 
-
-
 struct WordItem: ContentProtocol, Identifiable {
     let id = UUID()
     let letter: String
@@ -338,11 +387,9 @@ struct WordItem: ContentProtocol, Identifiable {
     }
 }
 
-
 struct WordResponse: Codable {
     let words: [String: [String]]
 }
-
 
 class WordViewModel: ObservableObject {
     @Published var words: [WordItem] = []
@@ -379,7 +426,6 @@ class WordViewModel: ObservableObject {
         }
     }
 }
-
 
 class TextToSpeechManager: ObservableObject {
     private let synthesizer = AVSpeechSynthesizer()
@@ -514,7 +560,6 @@ struct DataPageView<T: ContentProtocol, DataItemView: View>: View {
     }
 }
 
-
 struct AnimatedLetterView: View {
     let letter: String
 
@@ -603,5 +648,4 @@ extension Color {
         return Color(red: red, green: green, blue: blue)
     }
 }
-
 
