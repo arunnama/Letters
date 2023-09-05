@@ -3,17 +3,21 @@ import Dispatch
 import AVFoundation
 
 
-import SwiftUI
-
 struct NumberView: View {
     @ObservedObject var numberViewModel = NumberViewModel()
 
     var body: some View {
         NavigationView {
-            ContentView(dataViewModel: numberViewModel, dataItems: numberViewModel.numbers) { numberItem in
-                AnimatedLetterView(letter: numberItem.description)
-                    .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
-                    .foregroundColor(.blue)
+            Group { // Use Group to conditionally display either content or error
+                if numberViewModel.error != nil {
+                    Text("Error loading numbers. Please try again later.") // Display error message
+                } else {
+                    ContentView(dataViewModel: numberViewModel, dataItems: numberViewModel.numbers) { numberItem in
+                        AnimatedLetterView(letter: numberItem.description)
+                            .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
+                            .foregroundColor(.blue)
+                    }
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -43,10 +47,16 @@ struct AlphabetView: View {
 
     var body: some View {
         NavigationView {
-            ContentView(dataViewModel: alphabetViewModel, dataItems: alphabetViewModel.alphabets) { alphabetItem in
-                AnimatedLetterView(letter: alphabetItem.letter)
-                    .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
-                    .foregroundColor(.blue)
+            Group { // Use Group for error handling
+                if alphabetViewModel.error != nil {
+                    Text("Error loading alphabets. Please try again later.") // Display error message
+                } else {
+                    ContentView(dataViewModel: alphabetViewModel, dataItems: alphabetViewModel.alphabets) { alphabetItem in
+                        AnimatedLetterView(letter: alphabetItem.letter)
+                            .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
+                            .foregroundColor(.blue)
+                    }
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -65,7 +75,6 @@ struct AlphabetView: View {
                 }
             }
             .animation(.default)
-
         }.navigationTitle("Alphabets")
         .background(Color.green.edgesIgnoringSafeArea(.all))
     }
@@ -76,8 +85,14 @@ struct WordView: View {
 
     var body: some View {
         NavigationView {
-            ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
-                WordCardView(wordItem: wordItem)
+            Group { // Use Group for error handling
+                if wordViewModel.error != nil {
+                    Text("Error loading words. Please try again later.") // Display error message
+                } else {
+                    ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
+                        WordCardView(wordItem: wordItem)
+                    }
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -94,16 +109,12 @@ struct WordView: View {
                             .foregroundColor(.blue)
                     }
                 }
-            }.animation(.default)
-
+            }
+            .animation(.default)
         }.navigationTitle("Words")
         .background(Color.orange.edgesIgnoringSafeArea(.all))
     }
 }
-
-// Rest of your code...
-
-
 
 enum MenuItem: CaseIterable {
     case numbers, letters, words, other1, other2 // Add more options as needed
@@ -122,9 +133,6 @@ enum MenuItem: CaseIterable {
         return [.numbers, .letters, .words, .other1, .other2] // Add more cases if needed
     }
 }
-
-
-
 
 @main
 struct KidsLearningApp: App {
@@ -176,8 +184,6 @@ struct SplashView: View {
         }
     }
 }
-
-
 
 struct StartupView: View {
     @Binding var selectedMenuItem: MenuItem?
@@ -318,126 +324,34 @@ struct NumberResponse: Codable {
 
 class NumberViewModel: ObservableObject {
     @Published var numbers: [NumberItem] = []
+    @Published var error: Error?
 
     init() {
         fetchNumbers()
     }
 
     func fetchNumbers() {
-        if let url = URL(string: "https://raw.githubusercontent.com/arunnama/traindemo2/main/numbers.json") {
-            URLSession.shared.dataTask(with: url) { data, _, error in
-                if let data = data {
-                    do {
-                        let decodedData = try JSONDecoder().decode(NumberResponse.self, from: data)
-                        // Update the numbers property on the main thread
-                        DispatchQueue.main.async {
-                            self.numbers = decodedData.numbers.map { number in
-                                NumberItem(number: number)
+            if let url = URL(string: "https://raw.githubusercontent.com/arunnama/traindemo2/main/numbers.json") {
+                URLSession.shared.dataTask(with: url) { data, _, error in
+                    if let data = data {
+                        do {
+                            let decodedData = try JSONDecoder().decode(NumberResponse.self, from: data)
+                            // Update the numbers property on the main thread
+                            DispatchQueue.main.async {
+                                self.numbers = decodedData.numbers.map { number in
+                                    NumberItem(number: number)
+                                }
                             }
+                        } catch {
+                            self.error = error // Set the error property on failure
                         }
-                    } catch {
-                        print("Error decoding JSON: \(error)")
+                    } else if let error = error {
+                        self.error = error // Set the error property on network error
                     }
-                } else if let error = error {
-                    print("Error fetching JSON data: \(error)")
-                }
-            }.resume()
+                }.resume()
+            }
         }
-    }
 }
-
-//struct NumberView: View {
-//    @ObservedObject var numberViewModel = NumberViewModel()
-//
-//    var body: some View {
-//        NavigationView {
-//            ContentView(dataViewModel: numberViewModel, dataItems: numberViewModel.numbers) { numberItem in
-//                AnimatedLetterView(letter: numberItem.description)
-//                    .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
-//                    .foregroundColor(.blue)
-//            }
-//            .toolbar {
-//                ToolbarItem(placement: .navigationBarLeading) {
-//                    Button(action: {}) {
-//                        Image(systemName: "gear")
-//                    }
-//                }
-//                ToolbarItem(placement: .navigationBarTrailing) {
-//                    Button(action: {}) {
-//                        Image(systemName: "info.circle")
-//                    }
-//                }
-//            }
-//            .animation(.default) // Add animation here
-//        }
-//        .navigationTitle("Numbers") // Set the large navigation title here
-//    }
-//}
-
-//struct AlphabetView: View {
-//    @ObservedObject var alphabetViewModel = AlphabetViewModel()
-//
-//    var body: some View {
-//        NavigationView {
-//            ContentView(dataViewModel: alphabetViewModel, dataItems: alphabetViewModel.alphabets) { alphabetItem in
-//                AnimatedLetterView(letter: alphabetItem.letter) // Use AnimatedLetterView here
-//                    .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
-//                    .foregroundColor(.blue)
-//            }
-//            .toolbar {
-//                ToolbarItem(placement: .navigationBarLeading) {
-//                    Button(action: {}) {
-//                        Image(systemName: "gear")
-//                    }
-//                }
-//                ToolbarItem(placement: .navigationBarTrailing) {
-//                    Button(action: {}) {
-//                        Image(systemName: "info.circle")
-//                    }
-//                }
-//            }
-//            .animation(.default) // Add animation here
-//        }
-//        .navigationTitle("Alphabets") // Set the large navigation title here
-//    }
-//}
-
-//struct WordView: View {
-//    @ObservedObject var wordViewModel = WordViewModel()
-//
-//    var body: some View {
-//        ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
-//            WordCardView(wordItem: wordItem)
-//        }
-//        .navigationBarTitle("Words", displayMode: .large)
-//    }
-//}
-
-//struct WordView: View {
-//    @ObservedObject var wordViewModel = WordViewModel()
-//
-//    var body: some View {
-//        NavigationView {
-//            ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
-//                WordCardView(wordItem: wordItem)
-//            }
-//            .toolbar {
-//                ToolbarItem(placement: .navigationBarLeading) {
-//                    Button(action: {}) {
-//                        Image(systemName: "gear")
-//                    }
-//                }
-//                ToolbarItem(placement: .navigationBarTrailing) {
-//                    Button(action: {}) {
-//                        Image(systemName: "info.circle")
-//                    }
-//                }
-//            }.animation(.default) // Add animation here
-//
-//        }.navigationTitle("Words")
-//    }
-//}
-
 
 struct WordCardView: View {
     let wordItem: WordItem
@@ -496,7 +410,6 @@ struct WordCard: View {
     }
 }
 
-
 struct AlphabetData: Codable {
     let alphabets: [AlphabetItem]
 }
@@ -512,6 +425,7 @@ struct AlphabetItem: ContentProtocol {
 
 class AlphabetViewModel: ObservableObject {
     @Published var alphabets: [AlphabetItem] = []
+    @Published var error: Error?
 
     init() {
         fetchAlphabets()
@@ -527,10 +441,10 @@ class AlphabetViewModel: ObservableObject {
                             self.alphabets = decodedData.alphabets
                         }
                     } catch {
-                        print("Error decoding JSON: \(error)")
+                        self.error = error // Set the error property on failure
                     }
                 } else if let error = error {
-                    print("Error fetching JSON data: \(error)")
+                    self.error = error // Set the error property on network error
                 }
             }.resume()
         }
@@ -553,6 +467,7 @@ struct WordResponse: Codable {
 
 class WordViewModel: ObservableObject {
     @Published var words: [WordItem] = []
+    @Published var error: Error?
 
     init() {
         fetchWords()
@@ -577,10 +492,10 @@ class WordViewModel: ObservableObject {
                             self.words = wordItems
                         }
                     } catch {
-                        print("Error decoding JSON: \(error)")
+                        self.error = error // Set the error property on failure
                     }
                 } else if let error = error {
-                    print("Error fetching JSON data: \(error)")
+                    self.error = error // Set the error property on network error
                 }
             }.resume()
         }
