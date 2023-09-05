@@ -187,18 +187,94 @@ class NumberViewModel: ObservableObject {
     }
 }
 
+
+
 struct NumberView: View {
     @ObservedObject var numberViewModel = NumberViewModel()
 
     var body: some View {
-        ContentView(dataViewModel: numberViewModel, dataItems: numberViewModel.numbers) { numberItem in
-            AnimatedLetterView(letter: numberItem.description)
-                .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
-                .foregroundColor(.blue)
+        NavigationView {
+            ContentView(dataViewModel: numberViewModel, dataItems: numberViewModel.numbers) { numberItem in
+                AnimatedLetterView(letter: numberItem.description)
+                    .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
+                    .foregroundColor(.blue)
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {}) {
+                        Image(systemName: "gear")
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {}) {
+                        Image(systemName: "info.circle")
+                    }
+                }
+            }
+            .animation(.default) // Add animation here
         }
-        .navigationBarTitle("Numbers", displayMode: .large)
+        .navigationTitle("Numbers") // Set the large navigation title here
     }
 }
+
+struct AlphabetView: View {
+    @ObservedObject var alphabetViewModel = AlphabetViewModel()
+
+    var body: some View {
+        NavigationView {
+            ContentView(dataViewModel: alphabetViewModel, dataItems: alphabetViewModel.alphabets) { alphabetItem in
+                AnimatedLetterView(letter: alphabetItem.letter) // Use AnimatedLetterView here
+                    .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
+                    .foregroundColor(.blue)
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {}) {
+                        Image(systemName: "gear")
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {}) {
+                        Image(systemName: "info.circle")
+                    }
+                }
+            }
+            .animation(.default) // Add animation here
+        }
+        .navigationTitle("Alphabets") // Set the large navigation title here
+    }
+}
+
+
+struct WordView: View {
+    @ObservedObject var wordViewModel = WordViewModel()
+
+    var body: some View {
+        NavigationView {
+            ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
+                AnimatedLetterView(letter: wordItem.word) // Use AnimatedLetterView here
+                    .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
+                    .foregroundColor(.green)
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {}) {
+                        Image(systemName: "gear")
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {}) {
+                        Image(systemName: "info.circle")
+                    }
+                }
+            }
+            .animation(.default)
+        }
+        .navigationTitle("Words")
+    }
+}
+
+
 
 struct AlphabetData: Codable {
     let alphabets: [AlphabetItem]
@@ -240,18 +316,7 @@ class AlphabetViewModel: ObservableObject {
     }
 }
 
-struct AlphabetView: View {
-    @ObservedObject var alphabetViewModel = AlphabetViewModel()
 
-    var body: some View {
-        ContentView(dataViewModel: alphabetViewModel, dataItems: alphabetViewModel.alphabets) { alphabetItem in
-            Text(alphabetItem.letter)
-                .font(.largeTitle)
-                .foregroundColor(.blue)
-        }
-        .navigationBarTitle("Alphabets", displayMode: .large)
-    }
-}
 
 struct WordItem: ContentProtocol {
     let id: UUID
@@ -262,18 +327,6 @@ struct WordItem: ContentProtocol {
     }
 }
 
-struct WordView: View {
-    @ObservedObject var wordViewModel = WordViewModel()
-
-    var body: some View {
-        ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
-            Text(wordItem.word)
-                .font(.largeTitle)
-                .foregroundColor(.green)
-        }
-        .navigationBarTitle("Words", displayMode: .large)
-    }
-}
 
 class WordViewModel: ObservableObject {
     @Published var words: [WordItem] = []
@@ -424,7 +477,7 @@ struct DataPageView<T: ContentProtocol, DataItemView: View>: View {
     var body: some View {
         TabView(selection: $currentPage) {
             ForEach(dataItems.indices, id: \.self) { index in
-                AnimatedLetterView(letter: dataItems[index].description)
+                dataItemViewBuilder(dataItems[index])
                     .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
             }
         }
@@ -434,6 +487,7 @@ struct DataPageView<T: ContentProtocol, DataItemView: View>: View {
         }
     }
 }
+
 
 struct AnimatedLetterView: View {
     let letter: String
