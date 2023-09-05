@@ -20,31 +20,100 @@ enum MenuItem: CaseIterable {
     }
 }
 
+//@main
+//struct KidsLearningApp: App {
+//    @State private var selectedMenuItem: MenuItem? = nil
+//
+//    var body: some Scene {
+//        WindowGroup {
+//            StartupView(selectedMenuItem: $selectedMenuItem)
+//                .onAppear {
+//                    selectedMenuItem = nil // Reset selectedMenuItem when the view appears
+//                }
+//        }
+//    }
+//}
+
 @main
 struct KidsLearningApp: App {
+    @State private var isSplashPresented = true
     @State private var selectedMenuItem: MenuItem? = nil
 
     var body: some Scene {
         WindowGroup {
-            StartupView(selectedMenuItem: $selectedMenuItem)
-                .onAppear {
-                    selectedMenuItem = nil // Reset selectedMenuItem when the view appears
+            ZStack {
+                if isSplashPresented {
+                    SplashView()
+                        .onAppear {
+                            // Simulate a delay for the splash screen
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                withAnimation {
+                                    isSplashPresented = false
+                                }
+                            }
+                        }
+                } else {
+                    StartupView(selectedMenuItem: $selectedMenuItem)
+                        .onAppear {
+                            selectedMenuItem = nil // Reset selectedMenuItem when the view appears
+                        }
                 }
+            }
         }
     }
 }
 
+struct SplashView: View {
+    var body: some View {
+        ZStack {
+            // Background gradient with animation
+            LinearGradient(
+                gradient: Gradient(colors: [.purple, .blue, .green, .yellow, .pink, .orange]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+
+            // Your splash screen content here, such as a logo or animated graphic
+            Image(systemName: "star.fill")
+                .resizable()
+                .frame(width: 100, height: 100)
+                .foregroundColor(.white)
+                .scaleEffect(2.0)
+                .rotationEffect(.degrees(360))
+        }
+    }
+}
+
+
+
 struct StartupView: View {
     @Binding var selectedMenuItem: MenuItem?
 
+    let gradientColors: [Color] = [.purple, .blue, .green, .yellow, .pink, .orange]
+
     var body: some View {
         NavigationView {
-            VStack {
-                Text("Kids Learning App")
-                    .font(.largeTitle)
-                    .padding(.top, 20)
-                ScrollView {
-                    VStack {
+            ZStack {
+                // Background gradient with animation
+                LinearGradient(
+                    gradient: Gradient(colors: gradientColors),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+
+                VStack {
+                    // Title with animation
+                    Text("Kids Learning App")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(.top, 20)
+                        .scaleEffect(selectedMenuItem == nil ? 1.0 : 0.8)
+                        .animation(.spring(response: 0.5, dampingFraction: 0.6))
+
+                    ScrollView {
                         VStack(spacing: 20) {
                             ForEach(MenuItem.allCases, id: \.self) { item in
                                 MenuItemView(item: item) {
@@ -53,8 +122,6 @@ struct StartupView: View {
                             }
                         }
                         .padding()
-
-                        Spacer()
                     }
                 }
             }
@@ -86,6 +153,7 @@ struct StartupView: View {
         }
     }
 }
+
 
 struct MenuItemView: View {
     let item: MenuItem
@@ -274,7 +342,7 @@ struct WordView: View {
                 }
             }.animation(.default) // Add animation here
 
-        }.navigationTitle("Words") 
+        }.navigationTitle("Words")
     }
 }
 
