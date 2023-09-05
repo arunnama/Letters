@@ -2,6 +2,109 @@ import SwiftUI
 import Dispatch
 import AVFoundation
 
+
+import SwiftUI
+
+struct NumberView: View {
+    @ObservedObject var numberViewModel = NumberViewModel()
+
+    var body: some View {
+        NavigationView {
+            ContentView(dataViewModel: numberViewModel, dataItems: numberViewModel.numbers) { numberItem in
+                AnimatedLetterView(letter: numberItem.description)
+                    .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
+                    .foregroundColor(.blue)
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {}) {
+                        Image(systemName: "gear")
+                            .font(.system(size: 20))
+                            .foregroundColor(.blue)
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {}) {
+                        Image(systemName: "info.circle")
+                            .font(.system(size: 20))
+                            .foregroundColor(.blue)
+                    }
+                }
+            }
+            .animation(.default)
+
+        }.navigationTitle("Numbers")
+        .background(Color.yellow.edgesIgnoringSafeArea(.all))
+    }
+}
+
+struct AlphabetView: View {
+    @ObservedObject var alphabetViewModel = AlphabetViewModel()
+
+    var body: some View {
+        NavigationView {
+            ContentView(dataViewModel: alphabetViewModel, dataItems: alphabetViewModel.alphabets) { alphabetItem in
+                AnimatedLetterView(letter: alphabetItem.letter)
+                    .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
+                    .foregroundColor(.blue)
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {}) {
+                        Image(systemName: "gear")
+                            .font(.system(size: 20))
+                            .foregroundColor(.blue)
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {}) {
+                        Image(systemName: "info.circle")
+                            .font(.system(size: 20))
+                            .foregroundColor(.blue)
+                    }
+                }
+            }
+            .animation(.default)
+
+        }.navigationTitle("Alphabets")
+        .background(Color.green.edgesIgnoringSafeArea(.all))
+    }
+}
+
+struct WordView: View {
+    @ObservedObject var wordViewModel = WordViewModel()
+
+    var body: some View {
+        NavigationView {
+            ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
+                WordCardView(wordItem: wordItem)
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {}) {
+                        Image(systemName: "gear")
+                            .font(.system(size: 20))
+                            .foregroundColor(.blue)
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {}) {
+                        Image(systemName: "info.circle")
+                            .font(.system(size: 20))
+                            .foregroundColor(.blue)
+                    }
+                }
+            }.animation(.default)
+
+        }.navigationTitle("Words")
+        .background(Color.orange.edgesIgnoringSafeArea(.all))
+    }
+}
+
+// Rest of your code...
+
+
+
 enum MenuItem: CaseIterable {
     case numbers, letters, words, other1, other2 // Add more options as needed
 
@@ -20,19 +123,8 @@ enum MenuItem: CaseIterable {
     }
 }
 
-//@main
-//struct KidsLearningApp: App {
-//    @State private var selectedMenuItem: MenuItem? = nil
-//
-//    var body: some Scene {
-//        WindowGroup {
-//            StartupView(selectedMenuItem: $selectedMenuItem)
-//                .onAppear {
-//                    selectedMenuItem = nil // Reset selectedMenuItem when the view appears
-//                }
-//        }
-//    }
-//}
+
+
 
 @main
 struct KidsLearningApp: App {
@@ -254,61 +346,61 @@ class NumberViewModel: ObservableObject {
     }
 }
 
-struct NumberView: View {
-    @ObservedObject var numberViewModel = NumberViewModel()
+//struct NumberView: View {
+//    @ObservedObject var numberViewModel = NumberViewModel()
+//
+//    var body: some View {
+//        NavigationView {
+//            ContentView(dataViewModel: numberViewModel, dataItems: numberViewModel.numbers) { numberItem in
+//                AnimatedLetterView(letter: numberItem.description)
+//                    .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
+//                    .foregroundColor(.blue)
+//            }
+//            .toolbar {
+//                ToolbarItem(placement: .navigationBarLeading) {
+//                    Button(action: {}) {
+//                        Image(systemName: "gear")
+//                    }
+//                }
+//                ToolbarItem(placement: .navigationBarTrailing) {
+//                    Button(action: {}) {
+//                        Image(systemName: "info.circle")
+//                    }
+//                }
+//            }
+//            .animation(.default) // Add animation here
+//        }
+//        .navigationTitle("Numbers") // Set the large navigation title here
+//    }
+//}
 
-    var body: some View {
-        NavigationView {
-            ContentView(dataViewModel: numberViewModel, dataItems: numberViewModel.numbers) { numberItem in
-                AnimatedLetterView(letter: numberItem.description)
-                    .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
-                    .foregroundColor(.blue)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {}) {
-                        Image(systemName: "gear")
-                    }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {}) {
-                        Image(systemName: "info.circle")
-                    }
-                }
-            }
-            .animation(.default) // Add animation here
-        }
-        .navigationTitle("Numbers") // Set the large navigation title here
-    }
-}
-
-struct AlphabetView: View {
-    @ObservedObject var alphabetViewModel = AlphabetViewModel()
-
-    var body: some View {
-        NavigationView {
-            ContentView(dataViewModel: alphabetViewModel, dataItems: alphabetViewModel.alphabets) { alphabetItem in
-                AnimatedLetterView(letter: alphabetItem.letter) // Use AnimatedLetterView here
-                    .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
-                    .foregroundColor(.blue)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {}) {
-                        Image(systemName: "gear")
-                    }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {}) {
-                        Image(systemName: "info.circle")
-                    }
-                }
-            }
-            .animation(.default) // Add animation here
-        }
-        .navigationTitle("Alphabets") // Set the large navigation title here
-    }
-}
+//struct AlphabetView: View {
+//    @ObservedObject var alphabetViewModel = AlphabetViewModel()
+//
+//    var body: some View {
+//        NavigationView {
+//            ContentView(dataViewModel: alphabetViewModel, dataItems: alphabetViewModel.alphabets) { alphabetItem in
+//                AnimatedLetterView(letter: alphabetItem.letter) // Use AnimatedLetterView here
+//                    .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
+//                    .foregroundColor(.blue)
+//            }
+//            .toolbar {
+//                ToolbarItem(placement: .navigationBarLeading) {
+//                    Button(action: {}) {
+//                        Image(systemName: "gear")
+//                    }
+//                }
+//                ToolbarItem(placement: .navigationBarTrailing) {
+//                    Button(action: {}) {
+//                        Image(systemName: "info.circle")
+//                    }
+//                }
+//            }
+//            .animation(.default) // Add animation here
+//        }
+//        .navigationTitle("Alphabets") // Set the large navigation title here
+//    }
+//}
 
 //struct WordView: View {
 //    @ObservedObject var wordViewModel = WordViewModel()
@@ -321,30 +413,30 @@ struct AlphabetView: View {
 //    }
 //}
 
-struct WordView: View {
-    @ObservedObject var wordViewModel = WordViewModel()
-
-    var body: some View {
-        NavigationView {
-            ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
-                WordCardView(wordItem: wordItem)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {}) {
-                        Image(systemName: "gear")
-                    }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {}) {
-                        Image(systemName: "info.circle")
-                    }
-                }
-            }.animation(.default) // Add animation here
-
-        }.navigationTitle("Words")
-    }
-}
+//struct WordView: View {
+//    @ObservedObject var wordViewModel = WordViewModel()
+//
+//    var body: some View {
+//        NavigationView {
+//            ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
+//                WordCardView(wordItem: wordItem)
+//            }
+//            .toolbar {
+//                ToolbarItem(placement: .navigationBarLeading) {
+//                    Button(action: {}) {
+//                        Image(systemName: "gear")
+//                    }
+//                }
+//                ToolbarItem(placement: .navigationBarTrailing) {
+//                    Button(action: {}) {
+//                        Image(systemName: "info.circle")
+//                    }
+//                }
+//            }.animation(.default) // Add animation here
+//
+//        }.navigationTitle("Words")
+//    }
+//}
 
 
 struct WordCardView: View {
