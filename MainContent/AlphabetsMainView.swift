@@ -244,38 +244,11 @@ struct AlphabetView: View {
 }
 
 
-//struct WordView: View {
-//    @ObservedObject var wordViewModel = WordViewModel()
-//
-//    var body: some View {
-//        NavigationView {
-//            ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
-//                AnimatedLetterView(letter: wordItem.word) // Use AnimatedLetterView here
-//                    .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
-//                    .foregroundColor(.green)
-//            }
-//            .toolbar {
-//                ToolbarItem(placement: .navigationBarLeading) {
-//                    Button(action: {}) {
-//                        Image(systemName: "gear")
-//                    }
-//                }
-//                ToolbarItem(placement: .navigationBarTrailing) {
-//                    Button(action: {}) {
-//                        Image(systemName: "info.circle")
-//                    }
-//                }
-//            }
-//            .animation(.default)
-//        }
-//        .navigationTitle("Words")
-//    }
-//}
 struct WordView: View {
     @ObservedObject var wordViewModel = WordViewModel()
 
     var body: some View {
-        ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.wordItems) { wordItem in
+        ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
             WordCardView(wordItem: wordItem)
         }
         .navigationBarTitle("Words", displayMode: .large)
@@ -312,11 +285,6 @@ struct WordCardView: View {
         .frame(maxWidth: .infinity)
     }
 }
-
-
-
-
-
 
 struct AlphabetData: Codable {
     let alphabets: [AlphabetItem]
@@ -377,27 +345,29 @@ struct WordResponse: Codable {
 
 
 class WordViewModel: ObservableObject {
-    @Published var wordItems: [WordItem] = []
+    @Published var words: [WordItem] = []
 
     init() {
         fetchWords()
     }
 
     func fetchWords() {
-        
         if let url = URL(string: "https://raw.githubusercontent.com/arunnama/traindemo2/main/words.json") {
             URLSession.shared.dataTask(with: url) { data, _, error in
                 if let data = data {
                     do {
                         let decodedData = try JSONDecoder().decode(WordResponse.self, from: data)
                         var wordItems: [WordItem] = []
-
+                        
                         for (letter, words) in decodedData.words {
                             wordItems.append(WordItem(letter: letter, words: words))
                         }
+                        
+                        // Sort the wordItems by letter to maintain order
+                        wordItems.sort { $0.letter < $1.letter }
 
                         DispatchQueue.main.async {
-                            self.wordItems = wordItems
+                            self.words = wordItems
                         }
                     } catch {
                         print("Error decoding JSON: \(error)")
@@ -409,8 +379,6 @@ class WordViewModel: ObservableObject {
         }
     }
 }
-
-
 
 
 class TextToSpeechManager: ObservableObject {
