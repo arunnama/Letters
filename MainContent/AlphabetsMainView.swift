@@ -10,12 +10,14 @@ struct NumberView: View {
         NavigationView {
             Group { // Use Group to conditionally display either content or error
                 if numberViewModel.error != nil {
-                    Text("Error loading numbers. Please try again later.") // Display error message
+                    Text("Error loading numbers. Please try again later.")
+                        .accessibilityLabel(Text("Error loading numbers. Please try again later."))
                 } else {
                     ContentView(dataViewModel: numberViewModel, dataItems: numberViewModel.numbers) { numberItem in
                         AnimatedLetterView(letter: numberItem.description)
                             .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
                             .foregroundColor(.blue)
+                            .accessibilityLabel(Text("Number \(numberItem.number)"))
                     }
                 }
             }
@@ -25,6 +27,7 @@ struct NumberView: View {
                         Image(systemName: "gear")
                             .font(.system(size: 20))
                             .foregroundColor(.blue)
+                            .accessibilityLabel(Text("Settings"))
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -32,11 +35,11 @@ struct NumberView: View {
                         Image(systemName: "info.circle")
                             .font(.system(size: 20))
                             .foregroundColor(.blue)
+                            .accessibilityLabel(Text("Information"))
                     }
                 }
             }
             .animation(.default)
-
         }.navigationTitle("Numbers")
         .background(Color.yellow.edgesIgnoringSafeArea(.all))
     }
@@ -49,12 +52,14 @@ struct AlphabetView: View {
         NavigationView {
             Group { // Use Group for error handling
                 if alphabetViewModel.error != nil {
-                    Text("Error loading alphabets. Please try again later.") // Display error message
+                    Text("Error loading alphabets. Please try again later.")
+                        .accessibilityLabel(Text("Error loading alphabets. Please try again later."))
                 } else {
                     ContentView(dataViewModel: alphabetViewModel, dataItems: alphabetViewModel.alphabets) { alphabetItem in
                         AnimatedLetterView(letter: alphabetItem.letter)
                             .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
                             .foregroundColor(.blue)
+                            .accessibilityLabel(Text("Letter \(alphabetItem.letter)"))
                     }
                 }
             }
@@ -64,6 +69,7 @@ struct AlphabetView: View {
                         Image(systemName: "gear")
                             .font(.system(size: 20))
                             .foregroundColor(.blue)
+                            .accessibilityLabel(Text("Settings"))
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -71,6 +77,7 @@ struct AlphabetView: View {
                         Image(systemName: "info.circle")
                             .font(.system(size: 20))
                             .foregroundColor(.blue)
+                            .accessibilityLabel(Text("Information"))
                     }
                 }
             }
@@ -87,7 +94,8 @@ struct WordView: View {
         NavigationView {
             Group { // Use Group for error handling
                 if wordViewModel.error != nil {
-                    Text("Error loading words. Please try again later.") // Display error message
+                    Text("Error loading words. Please try again later.")
+                        .accessibilityLabel(Text("Error loading words. Please try again later."))
                 } else {
                     ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
                         WordCardView(wordItem: wordItem)
@@ -100,6 +108,7 @@ struct WordView: View {
                         Image(systemName: "gear")
                             .font(.system(size: 20))
                             .foregroundColor(.blue)
+                            .accessibilityLabel(Text("Settings"))
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -107,6 +116,7 @@ struct WordView: View {
                         Image(systemName: "info.circle")
                             .font(.system(size: 20))
                             .foregroundColor(.blue)
+                            .accessibilityLabel(Text("Information"))
                     }
                 }
             }
@@ -115,6 +125,7 @@ struct WordView: View {
         .background(Color.orange.edgesIgnoringSafeArea(.all))
     }
 }
+
 
 enum MenuItem: CaseIterable {
     case numbers, letters, words, other1, other2 // Add more options as needed
