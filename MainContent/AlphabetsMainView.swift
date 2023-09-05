@@ -2,7 +2,6 @@ import SwiftUI
 import Dispatch
 import AVFoundation
 
-
 struct NumberView: View {
     @ObservedObject var numberViewModel = NumberViewModel()
 
@@ -40,10 +39,24 @@ struct NumberView: View {
                 }
             }
             .animation(.default)
-        }.navigationTitle("Numbers")
-        .background(Color.yellow.edgesIgnoringSafeArea(.all))
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [.red, .yellow, .green, .blue, .purple]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea(.all)
+                .frame(height: 120) // Adjust the height as needed
+                .offset(y: -60) // Adjust the offset to center the gradient
+                .animation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true))
+            )
+        }
+        .navigationTitle("Numbers")
     }
 }
+
+// Add colorful navigation bar animations to AlphabetView and WordView as well
+
 
 struct AlphabetView: View {
     @ObservedObject var alphabetViewModel = AlphabetViewModel()
@@ -82,8 +95,13 @@ struct AlphabetView: View {
                 }
             }
             .animation(.default)
-        }.navigationTitle("Alphabets")
-        .background(Color.green.edgesIgnoringSafeArea(.all))
+        }
+        .navigationTitle("Alphabets")
+        .background(LinearGradient(
+            gradient: Gradient(colors: [.purple, .blue, .green, .yellow, .pink, .orange]),
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        ).edgesIgnoringSafeArea(.all))
     }
 }
 
@@ -121,10 +139,18 @@ struct WordView: View {
                 }
             }
             .animation(.default)
-        }.navigationTitle("Words")
-        .background(Color.orange.edgesIgnoringSafeArea(.all))
+        }
+        .navigationTitle("Words")
+        .background(LinearGradient(
+            gradient: Gradient(colors: [.orange, .yellow, .green]),
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        ).edgesIgnoringSafeArea(.all))
     }
 }
+
+// Add colorful background animations here
+
 
 
 enum MenuItem: CaseIterable {
