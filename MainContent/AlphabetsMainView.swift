@@ -20,24 +20,6 @@ struct NumberView: View {
                     }
                 }
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {}) {
-                        Image(systemName: "gear")
-                            .font(.system(size: 20))
-                            .foregroundColor(.blue)
-                            .accessibilityLabel(Text("Settings"))
-                    }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {}) {
-                        Image(systemName: "info.circle")
-                            .font(.system(size: 20))
-                            .foregroundColor(.blue)
-                            .accessibilityLabel(Text("Information"))
-                    }
-                }
-            }
             .animation(.default)
             .background(
                 LinearGradient(
@@ -76,24 +58,6 @@ struct AlphabetView: View {
                     }
                 }
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {}) {
-                        Image(systemName: "gear")
-                            .font(.system(size: 20))
-                            .foregroundColor(.blue)
-                            .accessibilityLabel(Text("Settings"))
-                    }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {}) {
-                        Image(systemName: "info.circle")
-                            .font(.system(size: 20))
-                            .foregroundColor(.blue)
-                            .accessibilityLabel(Text("Information"))
-                    }
-                }
-            }
             .animation(.default)
         }
         .navigationTitle("Alphabets")
@@ -120,24 +84,6 @@ struct WordView: View {
                     }
                 }
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {}) {
-                        Image(systemName: "gear")
-                            .font(.system(size: 20))
-                            .foregroundColor(.blue)
-                            .accessibilityLabel(Text("Settings"))
-                    }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {}) {
-                        Image(systemName: "info.circle")
-                            .font(.system(size: 20))
-                            .foregroundColor(.blue)
-                            .accessibilityLabel(Text("Information"))
-                    }
-                }
-            }
             .animation(.default)
         }
         .navigationTitle("Words")
@@ -154,20 +100,18 @@ struct WordView: View {
 
 
 enum MenuItem: CaseIterable {
-    case numbers, letters, words, other1, other2 // Add more options as needed
+    case numbers, letters, words // Add more options as needed
 
     var title: String {
         switch self {
         case .numbers: return "Numbers"
         case .letters: return "Letters"
         case .words: return "Words"
-        case .other1: return "Other Option 1"
-        case .other2: return "Other Option 2"
         }
     }
 
     static var allCases: [MenuItem] {
-        return [.numbers, .letters, .words, .other1, .other2] // Add more cases if needed
+        return [.numbers, .letters, .words] // Add more cases if needed
     }
 }
 
@@ -279,10 +223,6 @@ struct StartupView: View {
             return AnyView(AlphabetView())
         case .words:
             return AnyView(WordView())
-        case .other1:
-            return AnyView(Text("Other Option 1 View"))
-        case .other2:
-            return AnyView(Text("Other Option 2 View"))
         default:
             return AnyView(EmptyView())
         }
@@ -326,8 +266,8 @@ extension MenuItem {
         case .numbers: return .blue
         case .letters: return .green
         case .words: return .orange
-        case .other1: return .purple
-        case .other2: return .red
+//        case .other1: return .purple
+//        case .other2: return .red
         }
     }
 
@@ -336,8 +276,8 @@ extension MenuItem {
         case .numbers: return "number.square.fill"
         case .letters: return "textformat.abc"
         case .words: return "book.fill"
-        case .other1: return "star.fill"
-        case .other2: return "heart.fill"
+//        case .other1: return "star.fill"
+//        case .other2: return "heart.fill"
         }
     }
 }
@@ -380,10 +320,15 @@ class NumberViewModel: ObservableObject {
                                 }
                             }
                         } catch {
-                            self.error = error // Set the error property on failure
+                            DispatchQueue.main.async {
+                                self.error = error
+                            }
+                            // Set the error property on failure
                         }
                     } else if let error = error {
-                        self.error = error // Set the error property on network error
+                        DispatchQueue.main.async {
+                            self.error = error
+                        }// Set the error property on network error
                     }
                 }.resume()
             }
@@ -478,10 +423,14 @@ class AlphabetViewModel: ObservableObject {
                             self.alphabets = decodedData.alphabets
                         }
                     } catch {
-                        self.error = error // Set the error property on failure
+                        DispatchQueue.main.async {
+                            self.error = error
+                        } // Set the error property on failure
                     }
                 } else if let error = error {
-                    self.error = error // Set the error property on network error
+                    DispatchQueue.main.async {
+                        self.error = error
+                    } // Set the error property on network error
                 }
             }.resume()
         }
@@ -529,10 +478,14 @@ class WordViewModel: ObservableObject {
                             self.words = wordItems
                         }
                     } catch {
-                        self.error = error // Set the error property on failure
+                        DispatchQueue.main.async {
+                            self.error = error
+                        } // Set the error property on failure
                     }
                 } else if let error = error {
-                    self.error = error // Set the error property on network error
+                    DispatchQueue.main.async {
+                        self.error = error
+                    } // Set the error property on network error
                 }
             }.resume()
         }
