@@ -1,3 +1,4 @@
+
 import SwiftUI
 import Dispatch
 import AVFoundation
@@ -9,8 +10,7 @@ struct NumberView: View {
         NavigationView {
             Group { // Use Group to conditionally display either content or error
                 if numberViewModel.error != nil {
-                    Text("Error loading numbers. Please try again later.")
-                        .accessibilityLabel(Text("Error loading numbers. Please try again later."))
+                    ErrorView(message: "Error loading numbers. Please try again later.")
                 } else {
                     ContentView(dataViewModel: numberViewModel, dataItems: numberViewModel.numbers) { numberItem in
                         AnimatedLetterView(letter: numberItem.description)
@@ -32,13 +32,12 @@ struct NumberView: View {
                 .offset(y: -60) // Adjust the offset to center the gradient
                 .animation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true))
             )
+            .navigationBarTitle("Numbers")
         }
-        .navigationTitle("Numbers")
     }
 }
 
 // Add colorful navigation bar animations to AlphabetView and WordView as well
-
 
 struct AlphabetView: View {
     @ObservedObject var alphabetViewModel = AlphabetViewModel()
@@ -47,8 +46,7 @@ struct AlphabetView: View {
         NavigationView {
             Group { // Use Group for error handling
                 if alphabetViewModel.error != nil {
-                    Text("Error loading alphabets. Please try again later.")
-                        .accessibilityLabel(Text("Error loading alphabets. Please try again later."))
+                    ErrorView(message: "Error loading alphabets. Please try again later.")
                 } else {
                     ContentView(dataViewModel: alphabetViewModel, dataItems: alphabetViewModel.alphabets) { alphabetItem in
                         AnimatedLetterView(letter: alphabetItem.letter)
@@ -59,13 +57,13 @@ struct AlphabetView: View {
                 }
             }
             .animation(.default)
+            .background(LinearGradient(
+                gradient: Gradient(colors: [.purple, .blue, .green, .yellow, .pink, .orange]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ).edgesIgnoringSafeArea(.all))
+            .navigationBarTitle("Alphabets")
         }
-        .navigationTitle("Alphabets")
-        .background(LinearGradient(
-            gradient: Gradient(colors: [.purple, .blue, .green, .yellow, .pink, .orange]),
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        ).edgesIgnoringSafeArea(.all))
     }
 }
 
@@ -76,8 +74,7 @@ struct WordView: View {
         NavigationView {
             Group { // Use Group for error handling
                 if wordViewModel.error != nil {
-                    Text("Error loading words. Please try again later.")
-                        .accessibilityLabel(Text("Error loading words. Please try again later."))
+                    ErrorView(message: "Error loading words. Please try again later.")
                 } else {
                     ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
                         WordCardView(wordItem: wordItem)
@@ -85,19 +82,15 @@ struct WordView: View {
                 }
             }
             .animation(.default)
+            .background(LinearGradient(
+                gradient: Gradient(colors: [.orange, .yellow, .green]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ).edgesIgnoringSafeArea(.all))
+            .navigationBarTitle("Words")
         }
-        .navigationTitle("Words")
-        .background(LinearGradient(
-            gradient: Gradient(colors: [.orange, .yellow, .green]),
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        ).edgesIgnoringSafeArea(.all))
     }
 }
-
-// Add colorful background animations here
-
-
 
 enum MenuItem: CaseIterable {
     case numbers, letters, words // Add more options as needed
@@ -229,7 +222,6 @@ struct StartupView: View {
     }
 }
 
-
 struct MenuItemView: View {
     let item: MenuItem
     let action: () -> Void
@@ -266,8 +258,8 @@ extension MenuItem {
         case .numbers: return .blue
         case .letters: return .green
         case .words: return .orange
-//        case .other1: return .purple
-//        case .other2: return .red
+        //        case .other1: return .purple
+        //        case .other2: return .red
         }
     }
 
@@ -276,8 +268,8 @@ extension MenuItem {
         case .numbers: return "number.square.fill"
         case .letters: return "textformat.abc"
         case .words: return "book.fill"
-//        case .other1: return "star.fill"
-//        case .other2: return "heart.fill"
+        //        case .other1: return "star.fill"
+        //        case .other2: return "heart.fill"
         }
     }
 }
@@ -308,31 +300,31 @@ class NumberViewModel: ObservableObject {
     }
 
     func fetchNumbers() {
-            if let url = URL(string: "https://raw.githubusercontent.com/arunnama/traindemo2/main/numbers.json") {
-                URLSession.shared.dataTask(with: url) { data, _, error in
-                    if let data = data {
-                        do {
-                            let decodedData = try JSONDecoder().decode(NumberResponse.self, from: data)
-                            // Update the numbers property on the main thread
-                            DispatchQueue.main.async {
-                                self.numbers = decodedData.numbers.map { number in
-                                    NumberItem(number: number)
-                                }
+        if let url = URL(string: AppConstants.baseURL + AppConstants.apiEndpoint + "/numbers.json") {
+            URLSession.shared.dataTask(with: url) { data, _, error in
+                if let data = data {
+                    do {
+                        let decodedData = try JSONDecoder().decode(NumberResponse.self, from: data)
+                        // Update the numbers property on the main thread
+                        DispatchQueue.main.async {
+                            self.numbers = decodedData.numbers.map { number in
+                                NumberItem(number: number)
                             }
-                        } catch {
-                            DispatchQueue.main.async {
-                                self.error = error
-                            }
-                            // Set the error property on failure
                         }
-                    } else if let error = error {
+                    } catch {
                         DispatchQueue.main.async {
                             self.error = error
-                        }// Set the error property on network error
+                        }
+                        // Set the error property on failure
                     }
-                }.resume()
-            }
+                } else if let error = error {
+                    DispatchQueue.main.async {
+                        self.error = error
+                    } // Set the error property on network error
+                }
+            }.resume()
         }
+    }
 }
 
 struct WordCardView: View {
@@ -372,7 +364,7 @@ struct WordCard: View {
             Text(word)
                 .font(.title)
                 .foregroundColor(.green)
-            
+
             // Add an image/icon next to the word
             Image(systemName: "apple.fill") // Replace with an appropriate image
                 .resizable()
@@ -414,7 +406,7 @@ class AlphabetViewModel: ObservableObject {
     }
 
     func fetchAlphabets() {
-        if let url = URL(string: "https://raw.githubusercontent.com/arunnama/traindemo2/main/alphabets.json") {
+        if let url = URL(string: AppConstants.baseURL + AppConstants.apiEndpoint + "/alphabets.json") {
             URLSession.shared.dataTask(with: url) { data, _, error in
                 if let data = data {
                     do {
@@ -460,17 +452,17 @@ class WordViewModel: ObservableObject {
     }
 
     func fetchWords() {
-        if let url = URL(string: "https://raw.githubusercontent.com/arunnama/traindemo2/main/words.json") {
+        if let url = URL(string: AppConstants.baseURL + AppConstants.apiEndpoint + "/words.json") {
             URLSession.shared.dataTask(with: url) { data, _, error in
                 if let data = data {
                     do {
                         let decodedData = try JSONDecoder().decode(WordResponse.self, from: data)
                         var wordItems: [WordItem] = []
-                        
+
                         for (letter, words) in decodedData.words {
                             wordItems.append(WordItem(letter: letter, words: words))
                         }
-                        
+
                         // Sort the wordItems by letter to maintain order
                         wordItems.sort { $0.letter < $1.letter }
 
@@ -664,53 +656,50 @@ struct BubbleView: View {
     @State private var yOffset: CGFloat = CGFloat.random(in: -50...UIScreen.main.bounds.height - 50)
     @State private var opacity: Double = 0.5
     @State private var bubbleColor: Color = Color.random()
-    @State private var bubbleSize: CGFloat = CGFloat.random(in: 20...60)
-    @State private var bubbleSpeed: Double = Double.random(in: 4...8)
+    @State private var bubbleSize: CGFloat = CGFloat.random(in: 20...100)
 
     var body: some View {
         Circle()
+            .frame(width: bubbleSize, height: bubbleSize)
             .foregroundColor(bubbleColor)
             .opacity(opacity)
-            .frame(width: bubbleSize, height: bubbleSize)
-            .offset(x: xOffset, y: yOffset)
-            .animation(Animation.linear(duration: bubbleSpeed).repeatForever(autoreverses: true))
+            .position(x: xOffset, y: yOffset)
+            .animation(
+                Animation.linear(duration: Double.random(in: 5...20))
+                    .repeatForever(autoreverses: false)
+            )
             .onAppear {
-                animateBubble()
+                // Randomize initial position
+                xOffset = CGFloat.random(in: -50...UIScreen.main.bounds.width - 50)
+                yOffset = CGFloat.random(in: -50...UIScreen.main.bounds.height - 50)
             }
     }
+}
 
-    func animateBubble() {
-        let randomXOffset = CGFloat.random(in: -50...UIScreen.main.bounds.width - 50)
-        let randomYOffset = CGFloat.random(in: -50...UIScreen.main.bounds.height - 50)
+struct ErrorView: View {
+    let message: String
 
-        withAnimation(Animation.linear(duration: bubbleSpeed).repeatForever(autoreverses: true)) {
-            xOffset = randomXOffset
-            yOffset = randomYOffset
-            opacity = 0.2
-            bubbleColor = Color.random()
-            bubbleSize = CGFloat.random(in: 20...60)
-        }
-
-        if bubbleSize >= 40 {
-            withAnimation(Animation.easeInOut(duration: 0.5)) {
-                bubbleSize = bubbleSize * 1.5
-            }
-
-            if bubbleSize >= 100 {
-                withAnimation(Animation.easeInOut(duration: 0.2)) {
-                    bubbleSize = 0
-                }
-            }
-        }
+    var body: some View {
+        Text(message)
+            .font(.title)
+            .fontWeight(.bold)
+            .foregroundColor(.red)
+            .multilineTextAlignment(.center)
+            .padding()
     }
 }
 
 extension Color {
     static func random() -> Color {
-        let red = Double.random(in: 0...1)
-        let green = Double.random(in: 0...1)
-        let blue = Double.random(in: 0...1)
-        return Color(red: red, green: green, blue: blue)
+        return Color(
+            red: Double.random(in: 0...1),
+            green: Double.random(in: 0...1),
+            blue: Double.random(in: 0...1)
+        )
     }
 }
 
+struct AppConstants {
+    static let baseURL = "https://raw.githubusercontent.com"
+    static let apiEndpoint = "/arunnama/traindemo2/main"
+}
