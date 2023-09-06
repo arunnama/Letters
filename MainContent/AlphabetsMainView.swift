@@ -5,9 +5,11 @@ import AVFoundation
 
 struct NumberView: View {
     @ObservedObject var numberViewModel = NumberViewModel()
-
+    @State private var isTitleVisible = false // State for title animation
+    
     var body: some View {
         NavigationView {
+            // Rest of your view content
             Group { // Use Group to conditionally display either content or error
                 if numberViewModel.error != nil {
                     ErrorView(message: "Error loading numbers. Please try again later.")
@@ -21,18 +23,12 @@ struct NumberView: View {
                 }
             }
             .animation(.default)
-            .background(
-                LinearGradient(
-                    gradient: Gradient(colors: [.red, .yellow, .green, .blue, .purple]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea(.all)
-                .frame(height: 120) // Adjust the height as needed
-                .offset(y: -60) // Adjust the offset to center the gradient
-                .animation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true))
-            )
-            .navigationBarTitle("Numbers")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    ColorfulTitleBar(title: "Numbers")
+                }
+            }
         }
     }
 }
@@ -41,12 +37,13 @@ struct NumberView: View {
 
 struct AlphabetView: View {
     @ObservedObject var alphabetViewModel = AlphabetViewModel()
-
+    
     var body: some View {
         NavigationView {
             Group { // Use Group for error handling
                 if alphabetViewModel.error != nil {
                     ErrorView(message: "Error loading alphabets. Please try again later.")
+                        .accessibilityLabel(Text("Error loading alphabets. Please try again later."))
                 } else {
                     ContentView(dataViewModel: alphabetViewModel, dataItems: alphabetViewModel.alphabets) { alphabetItem in
                         AnimatedLetterView(letter: alphabetItem.letter)
@@ -57,24 +54,25 @@ struct AlphabetView: View {
                 }
             }
             .animation(.default)
-            .background(LinearGradient(
-                gradient: Gradient(colors: [.purple, .blue, .green, .yellow, .pink, .orange]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            ).edgesIgnoringSafeArea(.all))
-            .navigationBarTitle("Alphabets")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    ColorfulTitleBar(title: "Alphabets")
+                }
+            }
         }
     }
 }
 
 struct WordView: View {
     @ObservedObject var wordViewModel = WordViewModel()
-
+    
     var body: some View {
         NavigationView {
             Group { // Use Group for error handling
                 if wordViewModel.error != nil {
-                    ErrorView(message: "Error loading words. Please try again later.")
+                    Text("Error loading words. Please try again later.")
+                        .accessibilityLabel(Text("Error loading words. Please try again later."))
                 } else {
                     ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
                         WordCardView(wordItem: wordItem)
@@ -82,16 +80,39 @@ struct WordView: View {
                 }
             }
             .animation(.default)
-            .background(LinearGradient(
-                gradient: Gradient(colors: [.orange, .yellow, .green]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            ).edgesIgnoringSafeArea(.all))
-            .navigationBarTitle("Words")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    ColorfulTitleBar(title: "Words")
+                }
+            }
         }
     }
 }
 
+struct ColorfulTitleBar: View {
+    let title: String
+
+    var body: some View {
+        VStack {
+            Text(title)
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+                .padding(5)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(LinearGradient(
+                            gradient: Gradient(colors: [.red, .yellow, .green, .blue, .purple]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ))
+                )
+        }
+    }
+}
+
+// Add colorful background animations here
 enum MenuItem: CaseIterable {
     case numbers, letters, words // Add more options as needed
 
@@ -411,13 +432,15 @@ class AlphabetViewModel: ObservableObject {
                 if let data = data {
                     do {
                         let decodedData = try JSONDecoder().decode(AlphabetData.self, from: data)
+                        // Update the alphabets property on the main thread
                         DispatchQueue.main.async {
                             self.alphabets = decodedData.alphabets
                         }
                     } catch {
                         DispatchQueue.main.async {
                             self.error = error
-                        } // Set the error property on failure
+                        }
+                        // Set the error property on failure
                     }
                 } else if let error = error {
                     DispatchQueue.main.async {
