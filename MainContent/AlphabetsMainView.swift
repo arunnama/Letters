@@ -354,26 +354,37 @@ struct WordCardView: View {
     var body: some View {
         VStack {
             Text(wordItem.letter)
-                .font(.largeTitle)
-                .foregroundColor(.blue)
+                .font(.system(size: 48)) // Increase text size
+                .foregroundColor(.purple) // Use a bright color (purple in this example)
                 .padding(.top, 20)
 
             ScrollView {
                 LazyVStack(spacing: 20) {
                     ForEach(wordItem.words, id: \.self) { word in
                         WordCard(word: word)
+                            .padding(.horizontal, 20)
                     }
-                    .padding(.horizontal, 20)
                 }
             }
         }
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .foregroundColor(Color(red: 255/255, green: 223/255, blue: 186/255)) // Use a child-friendly background color
+                .foregroundColor(Color(red: 255/255, green: 223/255, blue: 186/255)) // Child-friendly background color
                 .shadow(radius: 5)
                 .padding()
         )
         .frame(maxWidth: .infinity)
+        .padding()
+        .background( // Add a gradient background
+            LinearGradient(
+                gradient: Gradient(colors: [.yellow, .green]), // Use colorful gradient colors
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .opacity(0.8) // Adjust opacity
+            .cornerRadius(20)
+        )
+        .animation(.spring()) // Add animation
     }
 }
 
@@ -381,29 +392,19 @@ struct WordCard: View {
     let word: String
 
     var body: some View {
-        VStack {
+        ZStack {
+            RoundedRectangle(cornerRadius: 20)
+                .foregroundColor(.white)
+                .shadow(radius: 5)
+                .frame(height: 100)
+            
             Text(word)
                 .font(.title)
-                .foregroundColor(.green)
-
-            // Add an image/icon next to the word
-            Image(systemName: "apple.fill") // Replace with an appropriate image
-                .resizable()
-                .frame(width: 50, height: 50)
-                .foregroundColor(.orange)
-
-            // Include a speaker button for pronunciation
-            Button(action: {
-                // Add text-to-speech functionality here
-            }) {
-                Image(systemName: "speaker.fill")
-                    .resizable()
-                    .frame(width: 30, height: 30)
-                    .foregroundColor(.blue)
-            }
+                .foregroundColor(.orange) // Use a bright color (orange in this example)
         }
     }
 }
+
 
 struct AlphabetData: Codable {
     let alphabets: [AlphabetItem]
