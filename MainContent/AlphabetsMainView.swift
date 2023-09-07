@@ -1,4 +1,5 @@
 
+
 import SwiftUI
 import Dispatch
 import AVFoundation
@@ -9,7 +10,6 @@ struct NumberView: View {
     
     var body: some View {
         NavigationView {
-            // Rest of your view content
             Group { // Use Group to conditionally display either content or error
                 if numberViewModel.error != nil {
                     ErrorView(message: "Error loading numbers. Please try again later.")
@@ -33,62 +33,7 @@ struct NumberView: View {
     }
 }
 
-// Add colorful navigation bar animations to AlphabetView and WordView as well
-
-struct AlphabetView: View {
-    @ObservedObject var alphabetViewModel = AlphabetViewModel()
-    
-    var body: some View {
-        NavigationView {
-            Group { // Use Group for error handling
-                if alphabetViewModel.error != nil {
-                    ErrorView(message: "Error loading alphabets. Please try again later.")
-                        .accessibilityLabel(Text("Error loading alphabets. Please try again later."))
-                } else {
-                    ContentView(dataViewModel: alphabetViewModel, dataItems: alphabetViewModel.alphabets) { alphabetItem in
-                        AnimatedLetterView(letter: alphabetItem.letter)
-                            .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
-                            .foregroundColor(.blue)
-                            .accessibilityLabel(Text("Letter \(alphabetItem.letter)"))
-                    }
-                }
-            }
-            .animation(.default)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    ColorfulTitleBar(title: "Alphabets")
-                }
-            }
-        }
-    }
-}
-
-struct WordView: View {
-    @ObservedObject var wordViewModel = WordViewModel()
-    
-    var body: some View {
-        NavigationView {
-            Group { // Use Group for error handling
-                if wordViewModel.error != nil {
-                    Text("Error loading words. Please try again later.")
-                        .accessibilityLabel(Text("Error loading words. Please try again later."))
-                } else {
-                    ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
-                        WordCardView(wordItem: wordItem)
-                    }
-                }
-            }
-            .animation(.default)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    ColorfulTitleBar(title: "Words")
-                }
-            }
-        }
-    }
-}
+// ... (AlphabetView and WordView code remains the same)
 
 struct ColorfulTitleBar: View {
     let title: String
@@ -239,6 +184,66 @@ struct StartupView: View {
             return AnyView(WordView())
         default:
             return AnyView(EmptyView())
+        }
+    }
+}
+
+// ... (MenuItemView and extension MenuItem code remains the same)
+
+// Rest of the code remains the same
+
+
+struct AlphabetView: View {
+    @ObservedObject var alphabetViewModel = AlphabetViewModel()
+    
+    var body: some View {
+        NavigationView {
+            Group { // Use Group for error handling
+                if alphabetViewModel.error != nil {
+                    ErrorView(message: "Error loading alphabets. Please try again later.")
+                        .accessibilityLabel(Text("Error loading alphabets. Please try again later."))
+                } else {
+                    ContentView(dataViewModel: alphabetViewModel, dataItems: alphabetViewModel.alphabets) { alphabetItem in
+                        AnimatedLetterView(letter: alphabetItem.letter)
+                            .font(.custom("Comic Sans MS", size: UIScreen.main.bounds.height * 0.7))
+                            .foregroundColor(.blue)
+                            .accessibilityLabel(Text("Letter \(alphabetItem.letter)"))
+                    }
+                }
+            }
+            .animation(.default)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    ColorfulTitleBar(title: "Alphabets")
+                }
+            }
+        }
+    }
+}
+
+struct WordView: View {
+    @ObservedObject var wordViewModel = WordViewModel()
+    
+    var body: some View {
+        NavigationView {
+            Group { // Use Group for error handling
+                if wordViewModel.error != nil {
+                    Text("Error loading words. Please try again later.")
+                        .accessibilityLabel(Text("Error loading words. Please try again later."))
+                } else {
+                    ContentView(dataViewModel: wordViewModel, dataItems: wordViewModel.words) { wordItem in
+                        WordCardView(wordItem: wordItem)
+                    }
+                }
+            }
+            .animation(.default)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    ColorfulTitleBar(title: "Words")
+                }
+            }
         }
     }
 }
@@ -404,6 +409,7 @@ struct WordCard: View {
         }
     }
 }
+
 
 
 struct AlphabetData: Codable {
