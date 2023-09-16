@@ -4,9 +4,21 @@ import SwiftUI
 import Dispatch
 import AVFoundation
 
+enum DataSource {
+    case local
+    case network
+}
+
+
+
 struct NumberView: View {
-    @ObservedObject var numberViewModel = NumberViewModel()
+    @ObservedObject var numberViewModel: NumberViewModel
     @State private var isTitleVisible = false // State for title animation
+    
+    init(dataSource: DataSource) {
+            self.numberViewModel = NumberViewModel(dataSource: dataSource)
+            // ...
+    }
     
     var body: some View {
         NavigationView {
@@ -78,6 +90,8 @@ enum MenuItem: CaseIterable {
 struct KidsLearningApp: App {
     @State private var isSplashPresented = true
     @State private var selectedMenuItem: MenuItem? = nil
+    private var dataSource: DataSource = .local // Choose the data source configuration here
+
 
     var body: some Scene {
         WindowGroup {
@@ -93,7 +107,7 @@ struct KidsLearningApp: App {
                             }
                         }
                 } else {
-                    StartupView(selectedMenuItem: $selectedMenuItem)
+                    StartupView(selectedMenuItem: $selectedMenuItem, dataSource: dataSource)
                         .onAppear {
                             selectedMenuItem = nil // Reset selectedMenuItem when the view appears
                         }
@@ -125,10 +139,26 @@ struct SplashView: View {
     }
 }
 
+// Define a custom view modifier to pass the dataSource parameter
+//struct DataSourceModifier: ViewModifier {
+//    let dataSource: DataSource
+//
+//    func body(content: Content) -> some View {
+//        content.environmentObject(dataSource)
+//    }
+//}
+
+import SwiftUI
+
 struct StartupView: View {
     @Binding var selectedMenuItem: MenuItem?
-
     let gradientColors: [Color] = [.purple, .blue, .green, .yellow, .pink, .orange]
+    let dataSource: DataSource // Add the data source parameter here
+
+    init(selectedMenuItem: Binding<MenuItem?>, dataSource: DataSource) {
+        self._selectedMenuItem = selectedMenuItem
+        self.dataSource = dataSource // Initialize the data source
+    }
 
     var body: some View {
         NavigationView {
@@ -157,6 +187,17 @@ struct StartupView: View {
                                 MenuItemView(item: item) {
                                     selectedMenuItem = item
                                 }
+                                .onTapGesture {
+                                    selectedMenuItem = item
+                                }
+                                .background(
+                                    NavigationLink("", destination: getContentView(), isActive: Binding<Bool>(
+                                        get: { selectedMenuItem == item },
+                                        set: { if !$0 { selectedMenuItem = nil } }
+                                    ))
+                                    .opacity(0)
+                                    .buttonStyle(PlainButtonStyle())
+                                )
                             }
                         }
                         .padding()
@@ -177,16 +218,20 @@ struct StartupView: View {
     func getContentView() -> some View {
         switch selectedMenuItem {
         case .numbers:
-            return AnyView(NumberView())
+            return AnyView(NumberView(dataSource: dataSource))
         case .letters:
-            return AnyView(AlphabetView())
+            return AnyView(AlphabetView(dataSource: dataSource))
         case .words:
-            return AnyView(WordView())
+            return AnyView(WordView(dataSource: dataSource))
         default:
             return AnyView(EmptyView())
         }
     }
+
 }
+
+// Rest of the code remains the same
+
 
 // ... (MenuItemView and extension MenuItem code remains the same)
 
@@ -194,7 +239,14 @@ struct StartupView: View {
 
 
 struct AlphabetView: View {
+
     @ObservedObject var alphabetViewModel = AlphabetViewModel()
+    
+    let dataSource: DataSource // Add the data source parameter here
+       
+       init(dataSource: DataSource) {
+           self.dataSource = dataSource // Initialize the data source
+       }
     
     var body: some View {
         NavigationView {
@@ -224,6 +276,12 @@ struct AlphabetView: View {
 
 struct WordView: View {
     @ObservedObject var wordViewModel = WordViewModel()
+
+    let dataSource: DataSource // Add the data source parameter here
+        
+    init(dataSource: DataSource) {
+        self.dataSource = dataSource // Initialize the data source
+    }
     
     var body: some View {
         NavigationView {
@@ -320,11 +378,30 @@ struct NumberResponse: Codable {
 class NumberViewModel: ObservableObject {
     @Published var numbers: [NumberItem] = []
     @Published var error: Error?
-
-    init() {
-        fetchNumbers()
+    
+    init(dataSource: DataSource) {
+        if dataSource == .local {
+            loadNumbersFromLocalJSON()
+        } else {
+            fetchNumbers()
+        }
     }
-
+    
+    func loadNumbersFromLocalJSON() {
+        if let path = Bundle.main.path(forResource: "numbers", ofType: "json") {
+            do {
+                let data = try Data(contentsOf: URL(fileURLWithPath: path))
+                let decodedData = try JSONDecoder().decode(NumberResponse.self, from: data)
+                self.numbers = decodedData.numbers.map { number in
+                    NumberItem(number: number)
+                }
+            } catch {
+                self.error = error
+            }
+        }
+    }
+    
+    
     func fetchNumbers() {
         if let url = URL(string: AppConstants.baseURL + AppConstants.apiEndpoint + "/numbers.json") {
             URLSession.shared.dataTask(with: url) { data, _, error in

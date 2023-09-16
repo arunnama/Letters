@@ -1,0 +1,30 @@
+{
+  "words": {
+    "A": ["Apple", "Ant", "Astronaut"],
+    "B": ["Banana", "Bear", "Bicycle"],
+    "C": ["Cat", "Car", "Cake"],
+    "D": ["Dog", "Dolphin", "Donut"],
+    "E": ["Elephant", "Eagle", "Egg"],
+    "F": ["Fish", "Fox", "Flower"],
+    "G": ["Giraffe", "Guitar", "Grass"],
+    "H": ["Horse", "Hat", "House"],
+    "I": ["Ice Cream", "Igloo", "Island"],
+    "J": ["Jellyfish", "Jacket", "Jungle"],
+    "K": ["Kangaroo", "Kite", "Key"],
+    "L": ["Lion", "Laptop", "Lemon"],
+    "M": ["Monkey", "Moon", "Mountain"],
+    "N": ["Nest", "Ninja", "Noodle"],
+    "O": ["Ostrich", "Orange", "Octopus"],
+    "P": ["Penguin", "Pizza", "Pineapple"],
+    "Q": ["Quokka", "Queen", "Quilt"],
+    "R": ["Rabbit", "Rainbow", "Rocket"],
+    "S": ["Squirrel", "Star", "Sun"],
+    "T": ["Tiger", "Turtle", "Tomato"],
+    "U": ["Umbrella", "Unicorn", "Umbrella"],
+    "V": ["Vase", "Violin", "Volcano"],
+    "W": ["Whale", "Watermelon", "Wagon"],
+    "X": ["Xylophone", "X-ray", "Xmas"],
+    "Y": ["Yak", "Yo-yo", "Yacht"],
+    "Z": ["Zebra", "Zoo", "Zipper"]
+  }
+}

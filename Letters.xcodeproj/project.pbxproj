@@ -15,8 +15,9 @@
 		C950D6892AA482FB0008B398 /* LettersUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C950D6882AA482FB0008B398 /* LettersUITestsLaunchTests.swift */; };
 		C950D6972AA4839B0008B398 /* LoadAlphabets.swift in Sources */ = {isa = PBXBuildFile; fileRef = C950D6962AA4839B0008B398 /* LoadAlphabets.swift */; };
 		C950D69D2AA484100008B398 /* AlphabetsMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C950D69C2AA484100008B398 /* AlphabetsMainView.swift */; };
-		C950D6A02AA484D20008B398 /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C950D69F2AA484D20008B398 /* AppConstants.swift */; };
-		C950D6A42AA4ABA70008B398 /* AlphabetViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C950D6A32AA4ABA70008B398 /* AlphabetViewModel.swift */; };
+		C9C42B9F2AB5942900E97F59 /* numbers.json in Resources */ = {isa = PBXBuildFile; fileRef = C9C42B9C2AB5873F00E97F59 /* numbers.json */; };
+		C9C42BA02AB5942900E97F59 /* alphabets.json in Resources */ = {isa = PBXBuildFile; fileRef = C9C42B9D2AB5878300E97F59 /* alphabets.json */; };
+		C9C42BA12AB5942900E97F59 /* words.json in Resources */ = {isa = PBXBuildFile; fileRef = C9C42B9E2AB587AE00E97F59 /* words.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,8 +49,9 @@
 		C950D6882AA482FB0008B398 /* LettersUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LettersUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		C950D6962AA4839B0008B398 /* LoadAlphabets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadAlphabets.swift; sourceTree = "<group>"; };
 		C950D69C2AA484100008B398 /* AlphabetsMainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlphabetsMainView.swift; sourceTree = "<group>"; };
-		C950D69F2AA484D20008B398 /* AppConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
-		C950D6A32AA4ABA70008B398 /* AlphabetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlphabetViewModel.swift; sourceTree = "<group>"; };
+		C9C42B9C2AB5873F00E97F59 /* numbers.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = numbers.json; sourceTree = "<group>"; };
+		C9C42B9D2AB5878300E97F59 /* alphabets.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = alphabets.json; sourceTree = "<group>"; };
+		C9C42B9E2AB587AE00E97F59 /* words.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = words.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,8 +82,8 @@
 		C950D65F2AA482FA0008B398 = {
 			isa = PBXGroup;
 			children = (
+				C9C42B9B2AB5871A00E97F59 /* Files */,
 				C950D6A72AA4AE230008B398 /* AudioFeature */,
-				C950D6A32AA4ABA70008B398 /* AlphabetViewModel.swift */,
 				C950D69E2AA484C50008B398 /* Utils */,
 				C950D69B2AA483F20008B398 /* MainContent */,
 				C950D6982AA483BA0008B398 /* Views */,
@@ -164,7 +166,6 @@
 		C950D69E2AA484C50008B398 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				C950D69F2AA484D20008B398 /* AppConstants.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -174,6 +175,16 @@
 			children = (
 			);
 			path = AudioFeature;
+			sourceTree = "<group>";
+		};
+		C9C42B9B2AB5871A00E97F59 /* Files */ = {
+			isa = PBXGroup;
+			children = (
+				C9C42B9C2AB5873F00E97F59 /* numbers.json */,
+				C9C42B9D2AB5878300E97F59 /* alphabets.json */,
+				C9C42B9E2AB587AE00E97F59 /* words.json */,
+			);
+			path = Files;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -280,6 +291,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C9C42B9F2AB5942900E97F59 /* numbers.json in Resources */,
+				C9C42BA02AB5942900E97F59 /* alphabets.json in Resources */,
+				C9C42BA12AB5942900E97F59 /* words.json in Resources */,
 				C950D6732AA482FB0008B398 /* Preview Assets.xcassets in Resources */,
 				C950D6702AA482FB0008B398 /* Assets.xcassets in Resources */,
 			);
@@ -309,8 +323,6 @@
 				C950D69D2AA484100008B398 /* AlphabetsMainView.swift in Sources */,
 				C950D66C2AA482FA0008B398 /* LettersApp.swift in Sources */,
 				C950D6972AA4839B0008B398 /* LoadAlphabets.swift in Sources */,
-				C950D6A42AA4ABA70008B398 /* AlphabetViewModel.swift in Sources */,
-				C950D6A02AA484D20008B398 /* AppConstants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
