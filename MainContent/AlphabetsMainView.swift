@@ -9,8 +9,6 @@ enum DataSource {
     case network
 }
 
-
-
 struct NumberView: View {
     @ObservedObject var numberViewModel: NumberViewModel
     @State private var isTitleVisible = false // State for title animation
@@ -45,7 +43,6 @@ struct NumberView: View {
     }
 }
 
-// ... (AlphabetView and WordView code remains the same)
 
 struct ColorfulTitleBar: View {
     let title: String
@@ -118,6 +115,8 @@ struct KidsLearningApp: App {
 }
 
 struct SplashView: View {
+    @State private var rotationAngle: Double = 0
+
     var body: some View {
         ZStack {
             // Background gradient with animation
@@ -134,21 +133,21 @@ struct SplashView: View {
                 .frame(width: 100, height: 100)
                 .foregroundColor(.white)
                 .scaleEffect(2.0)
-                .rotationEffect(.degrees(360))
+                .rotationEffect(.degrees(rotationAngle)) // Apply rotation effect
+                .animation(
+                    Animation.linear(duration: 5) // Slow initial rotation (5 seconds)
+                        .repeatForever(autoreverses: false) // Repeat indefinitely
+                )
+                .onAppear {
+                    // Gradually increase the rotation angle
+                    withAnimation(Animation.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
+                        self.rotationAngle += 360
+                    }
+                }
         }
     }
 }
 
-// Define a custom view modifier to pass the dataSource parameter
-//struct DataSourceModifier: ViewModifier {
-//    let dataSource: DataSource
-//
-//    func body(content: Content) -> some View {
-//        content.environmentObject(dataSource)
-//    }
-//}
-
-import SwiftUI
 
 struct StartupView: View {
     @Binding var selectedMenuItem: MenuItem?
@@ -230,23 +229,14 @@ struct StartupView: View {
 
 }
 
-// Rest of the code remains the same
-
-
-// ... (MenuItemView and extension MenuItem code remains the same)
-
-// Rest of the code remains the same
-
 
 struct AlphabetView: View {
-
-    @ObservedObject var alphabetViewModel = AlphabetViewModel()
+    @ObservedObject var alphabetViewModel: AlphabetViewModel
+    @State private var isTitleVisible = false // State for title animation
     
-    let dataSource: DataSource // Add the data source parameter here
-       
-       init(dataSource: DataSource) {
-           self.dataSource = dataSource // Initialize the data source
-       }
+    init(dataSource: DataSource) {
+        self.alphabetViewModel = AlphabetViewModel(dataSource: dataSource)
+    }
     
     var body: some View {
         NavigationView {
@@ -274,14 +264,79 @@ struct AlphabetView: View {
     }
 }
 
-struct WordView: View {
-    @ObservedObject var wordViewModel = WordViewModel()
+class AlphabetViewModel: ObservableObject {
+    @Published var alphabets: [AlphabetItem] = []
+    @Published var error: Error?
 
-    let dataSource: DataSource // Add the data source parameter here
+    init(dataSource: DataSource) {
+        if dataSource == .local {
+            loadAlphabetsFromLocalJSON()
+        } else {
+            fetchAlphabets()
+        }
+    }
+
+    func loadAlphabetsFromLocalJSON() {
+        if let path = Bundle.main.path(forResource: "alphabets", ofType: "json") {
+            do {
+                let data = try Data(contentsOf: URL(fileURLWithPath: path))
+                let decodedData = try JSONDecoder().decode(AlphabetResponse.self, from: data)
+                // Update the alphabets property on the main thread
+                DispatchQueue.main.async {
+                    self.alphabets = decodedData.alphabets
+                }
+
+            } catch {
+                self.error = error
+            }
+        }
+    }
+
+    func fetchAlphabets() {
+        if let url = URL(string: AppConstants.baseURL + AppConstants.apiEndpoint + "/alphabets.json") {
+            URLSession.shared.dataTask(with: url) { data, _, error in
+                if let data = data {
+                    do {
+                        let decodedData = try JSONDecoder().decode(AlphabetResponse.self, from: data)
+                        DispatchQueue.main.async {
+                            self.alphabets = decodedData.alphabets
+                        }
+                    } catch {
+                        DispatchQueue.main.async {
+                            self.error = error
+                        }
+                    }
+                } else if let error = error {
+                    DispatchQueue.main.async {
+                        self.error = error
+                    }
+                }
+            }.resume()
+        }
+    }
+}
+
+struct AlphabetItem: ContentProtocol, Identifiable {
+    let id = UUID()
+    let letter: String
+
+    var description: String {
+        return letter
+    }
+}
+
+struct AlphabetResponse: Codable {
+    let alphabets: [AlphabetItem]
+}
+
+struct WordView: View {
+    @ObservedObject var wordViewModel: WordViewModel
+
         
     init(dataSource: DataSource) {
-        self.dataSource = dataSource // Initialize the data source
+        self.wordViewModel = WordViewModel(dataSource: dataSource)
     }
+
     
     var body: some View {
         NavigationView {
@@ -493,49 +548,6 @@ struct AlphabetData: Codable {
     let alphabets: [AlphabetItem]
 }
 
-struct AlphabetItem: ContentProtocol {
-    let id = UUID()
-    let letter: String
-
-    var description: String {
-        return letter // You can customize this as needed
-    }
-}
-
-class AlphabetViewModel: ObservableObject {
-    @Published var alphabets: [AlphabetItem] = []
-    @Published var error: Error?
-
-    init() {
-        fetchAlphabets()
-    }
-
-    func fetchAlphabets() {
-        if let url = URL(string: AppConstants.baseURL + AppConstants.apiEndpoint + "/alphabets.json") {
-            URLSession.shared.dataTask(with: url) { data, _, error in
-                if let data = data {
-                    do {
-                        let decodedData = try JSONDecoder().decode(AlphabetData.self, from: data)
-                        // Update the alphabets property on the main thread
-                        DispatchQueue.main.async {
-                            self.alphabets = decodedData.alphabets
-                        }
-                    } catch {
-                        DispatchQueue.main.async {
-                            self.error = error
-                        }
-                        // Set the error property on failure
-                    }
-                } else if let error = error {
-                    DispatchQueue.main.async {
-                        self.error = error
-                    } // Set the error property on network error
-                }
-            }.resume()
-        }
-    }
-}
-
 struct WordItem: ContentProtocol, Identifiable {
     let id = UUID()
     let letter: String
@@ -554,8 +566,37 @@ class WordViewModel: ObservableObject {
     @Published var words: [WordItem] = []
     @Published var error: Error?
 
-    init() {
-        fetchWords()
+    init(dataSource: DataSource) {
+        if dataSource == .local {
+            loadWordsFromLocalJSON()
+        } else {
+            fetchWords()
+        }
+    }
+    
+    func loadWordsFromLocalJSON() {
+        if let path = Bundle.main.path(forResource: "words", ofType: "json") {
+            do {
+                let data = try Data(contentsOf: URL(fileURLWithPath: path))
+                let decodedData = try JSONDecoder().decode(WordResponse.self, from: data)
+                
+                var wordItems: [WordItem] = []
+
+                for (letter, words) in decodedData.words {
+                    wordItems.append(WordItem(letter: letter, words: words))
+                }
+
+                // Sort the wordItems by letter to maintain order
+                wordItems.sort { $0.letter < $1.letter }
+
+                DispatchQueue.main.async {
+                    self.words = wordItems
+                }
+
+            } catch {
+                self.error = error
+            }
+        }
     }
 
     func fetchWords() {
